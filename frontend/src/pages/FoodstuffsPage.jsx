@@ -482,58 +482,6 @@ export default function FoodstuffsPage({
 
           </div>
 
-          {/* Global Batch Action Toolbar */}
-          <div className="institutional-card p-3.5 sm:p-4 bg-gradient-to-r from-amber-500/5 via-white to-amber-500/5 border border-amber-200/90 rounded-sm flex flex-col lg:flex-row lg:items-center justify-between gap-3 shadow-xs">
-            <div className="flex items-center space-x-3">
-              <div className="w-9 h-9 rounded bg-[#fffbeb] text-[#d97706] border border-[#fef3c7] flex items-center justify-center shrink-0 shadow-xs">
-                <Zap className="w-4.5 h-4.5 text-[#d97706]" />
-              </div>
-              <div>
-                <h3 className="text-xs sm:text-sm font-bold text-[#0b1c30] font-sans flex items-center space-x-2">
-                  <span>Global Rapid Check-in</span>
-                  <span className="px-2 py-0.5 rounded-xs text-[10px] font-mono font-bold bg-[#d97706] text-white tracking-wider uppercase">
-                    BULK ACTIONS
-                  </span>
-                </h3>
-                <p className="text-[11px] text-slate-500 font-mono mt-0.5">
-                  {weeklyRecords.filter(r => r.status === 'unmarked').length} unmarked • {weeklyRecords.filter(r => r.status === 'paid').length} paid • {weeklyRecords.filter(r => r.status === 'missed').length} missed
-                </p>
-              </div>
-            </div>
-
-            <div className="flex flex-wrap items-center gap-2">
-              <button
-                onClick={() => openGlobalMarkModal('unmarked_paid')}
-                disabled={weeklyRecords.filter(r => r.status === 'unmarked').length === 0}
-                className="px-3.5 py-1.5 text-xs font-semibold font-sans bg-[#ecfdf5] hover:bg-[#d1fae5] text-[#059669] border border-[#a7f3d0] rounded-xs transition-all shadow-xs flex items-center space-x-1.5 whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer active:scale-95"
-                title="Mark all currently unmarked contributors in this week as PAID (₦3,500)"
-              >
-                <CheckCircle2 className="w-3.5 h-3.5 text-[#059669]" />
-                <span>Mark All Unmarked Paid ({weeklyRecords.filter(r => r.status === 'unmarked').length})</span>
-              </button>
-
-              <button
-                onClick={() => openGlobalMarkModal('filtered_paid')}
-                disabled={filteredWeeklyRecords.length === 0}
-                className="px-3.5 py-1.5 text-xs font-semibold font-sans bg-[#fffbeb] hover:bg-[#fef3c7] text-[#b45309] border border-[#fde68a] rounded-xs transition-all shadow-xs flex items-center space-x-1.5 whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer active:scale-95"
-                title="Mark all contributors matching current search/filter as PAID"
-              >
-                <Zap className="w-3.5 h-3.5 text-[#d97706]" />
-                <span>Mark Filtered Paid ({filteredWeeklyRecords.length})</span>
-              </button>
-
-              <button
-                onClick={() => openGlobalMarkModal('filtered_missed')}
-                disabled={filteredWeeklyRecords.length === 0}
-                className="px-3.5 py-1.5 text-xs font-semibold font-sans bg-[#fef2f2] hover:bg-[#ffe4e6] text-[#ba1a1a] border border-[#fecaca] rounded-xs transition-all shadow-xs flex items-center space-x-1.5 whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer active:scale-95"
-                title="Mark all contributors matching current search/filter as MISSED"
-              >
-                <XCircle className="w-3.5 h-3.5 text-[#ba1a1a]" />
-                <span>Mark Filtered Missed</span>
-              </button>
-            </div>
-          </div>
-
           {/* Weekly Search Bar (Sticky) */}
           <div className="sticky top-14 sm:top-[72px] z-30 bg-white/95 backdrop-blur-sm border border-[#cbd5e1] rounded-sm p-3 shadow-md">
             <div className="relative">
