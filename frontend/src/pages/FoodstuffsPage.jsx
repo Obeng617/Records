@@ -34,6 +34,7 @@ export default function FoodstuffsPage({
   const [loadingWeekly, setLoadingWeekly] = useState(false);
   const [weeklyFilter, setWeeklyFilter] = useState('all'); // 'all' | 'paid' | 'missed' | 'unmarked'
   const [togglingId, setTogglingId] = useState(null);
+  const [weeklySearchTerm, setWeeklySearchTerm] = useState('');
 
   // Contributors Directory State
   const [contributors, setContributors] = useState([]);
@@ -160,8 +161,12 @@ export default function FoodstuffsPage({
   const DEFAULT_ROW_LIMIT = 5;
 
   const filteredWeeklyRecords = weeklyRecords.filter(r => {
-    if (weeklyFilter === 'all') return true;
-    return r.status === weeklyFilter;
+    if (weeklyFilter !== 'all' && r.status !== weeklyFilter) return false;
+    if (weeklySearchTerm) {
+      const term = weeklySearchTerm.toLowerCase();
+      return r.name.toLowerCase().includes(term) || (r.contributor_code && r.contributor_code.toLowerCase().includes(term));
+    }
+    return true;
   });
 
   const displayedWeeklyRecords = showAllWeekly 
@@ -386,6 +391,20 @@ export default function FoodstuffsPage({
 
           </div>
 
+          {/* Weekly Search Bar (Sticky) */}
+          <div className="sticky top-0 z-10 bg-white/95 backdrop-blur-sm border border-[#cbd5e1] rounded-sm p-3 shadow-sm">
+            <div className="relative">
+              <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+              <input
+                type="text"
+                placeholder="Search contributor by name or FS code..."
+                value={weeklySearchTerm}
+                onChange={(e) => setWeeklySearchTerm(e.target.value)}
+                className="w-full pl-9 pr-3 py-2 bg-[#ffffff] border border-[#cbd5e1] rounded-sm text-sm text-[#0b1c30] placeholder-slate-400 focus:outline-none focus:border-[#d97706] shadow-sm"
+              />
+            </div>
+          </div>
+
           {/* Weekly Check-in Table */}
           <div className="institutional-panel overflow-hidden">
             {loadingWeekly ? (
@@ -525,8 +544,8 @@ export default function FoodstuffsPage({
       {activeSubTab === 'contributors' && (
         <div className="space-y-4">
           
-          {/* Search & Actions Bar */}
-          <div className="institutional-card p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-[#ffffff]">
+          {/* Search & Actions Bar (Sticky) */}
+          <div className="institutional-card p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white/95 backdrop-blur-sm sticky top-0 z-10 shadow-sm">
             <div className="relative flex-1">
               <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
               <input
