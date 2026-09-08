@@ -33,7 +33,7 @@ export default function ClientsPage({
       </div>
 
       {/* Toolbar & Search */}
-      <div className="institutional-card p-4 space-y-3">
+      <div className="institutional-card p-4 space-y-3 sticky top-14 sm:top-[72px] z-30 bg-white/95 backdrop-blur-sm shadow-md">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div className="relative flex-1">
             <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />

@@ -392,7 +392,7 @@ export default function FoodstuffsPage({
           </div>
 
           {/* Weekly Search Bar (Sticky) */}
-          <div className="sticky top-0 z-10 bg-white/95 backdrop-blur-sm border border-[#cbd5e1] rounded-sm p-3 shadow-sm">
+          <div className="sticky top-14 sm:top-[72px] z-30 bg-white/95 backdrop-blur-sm border border-[#cbd5e1] rounded-sm p-3 shadow-md">
             <div className="relative">
               <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
               <input
@@ -545,7 +545,7 @@ export default function FoodstuffsPage({
         <div className="space-y-4">
           
           {/* Search & Actions Bar (Sticky) */}
-          <div className="institutional-card p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white/95 backdrop-blur-sm sticky top-0 z-10 shadow-sm">
+          <div className="institutional-card p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white/95 backdrop-blur-sm sticky top-14 sm:top-[72px] z-30 shadow-md">
             <div className="relative flex-1">
               <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
               <input
