@@ -89,7 +89,7 @@ export default function ContributorModal({
               type="tel"
               placeholder="e.g. 08012345678"
               value={phone}
-              onChange={(e) => setPhone(e.target.value)}
+              onChange={(e) => setPhone(e.target.value.replace(/[^0-9]/g, ''))}
               className="w-full px-3.5 py-2 bg-[#ffffff] border border-[#cbd5e1] rounded-sm text-sm text-[#0b1c30] placeholder-slate-400 focus:outline-none focus:border-[#d97706] shadow-sm font-mono"
             />
           </div>
