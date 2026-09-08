@@ -173,7 +173,10 @@ export default function ContributorDetailModal({
   const missedWeeksCount = payments.filter(p => p.status === 'missed').length;
   const totalPaidAmount = payments
     .filter(p => p.status === 'paid')
-    .reduce((sum, p) => sum + (parseFloat(p.amount) || 3500), 0);
+    .reduce((sum, p) => {
+      const amt = (p.amount !== null && p.amount !== undefined) ? (parseFloat(p.amount) || 0) : 3500;
+      return sum + amt;
+    }, 0);
 
   return (
     <div className="fixed inset-0 z-40 flex items-center justify-center p-2 sm:p-4 bg-[#0b1c30]/50 backdrop-blur-sm animate-fade-in">

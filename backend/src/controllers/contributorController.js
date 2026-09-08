@@ -39,7 +39,8 @@ const getContributors = async (req, res, next) => {
     const paidWeeksMap = {};
     (payments || []).forEach(p => {
       const cid = p.contributor_id;
-      totalsMap[cid] = (totalsMap[cid] || 0) + (parseFloat(p.amount) || FIXED_WEEKLY_AMOUNT);
+      const amt = (p.amount !== null && p.amount !== undefined) ? (parseFloat(p.amount) || 0) : FIXED_WEEKLY_AMOUNT;
+      totalsMap[cid] = (totalsMap[cid] || 0) + amt;
       paidWeeksMap[cid] = (paidWeeksMap[cid] || 0) + 1;
     });
 
@@ -134,7 +135,10 @@ const getContributorById = async (req, res, next) => {
       .eq('contributor_id', id)
       .eq('status', 'paid');
 
-    const total_contributed = (payments || []).reduce((sum, p) => sum + (parseFloat(p.amount) || FIXED_WEEKLY_AMOUNT), 0);
+    const total_contributed = (payments || []).reduce((sum, p) => {
+      const amt = (p.amount !== null && p.amount !== undefined) ? (parseFloat(p.amount) || 0) : FIXED_WEEKLY_AMOUNT;
+      return sum + amt;
+    }, 0);
     const paid_weeks_count = (payments || []).length;
 
     res.json({
@@ -315,7 +319,10 @@ const getContributionStats = async (req, res, next) => {
 
     if (pErr) throw pErr;
 
-    const grand_total = (paidPayments || []).reduce((sum, p) => sum + (parseFloat(p.amount) || FIXED_WEEKLY_AMOUNT), 0);
+    const grand_total = (paidPayments || []).reduce((sum, p) => {
+      const amt = (p.amount !== null && p.amount !== undefined) ? (parseFloat(p.amount) || 0) : FIXED_WEEKLY_AMOUNT;
+      return sum + amt;
+    }, 0);
     const total_paid_weeks = (paidPayments || []).length;
 
     // Current week collection stats
