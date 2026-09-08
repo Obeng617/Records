@@ -345,6 +345,66 @@ const getContributionStats = async (req, res, next) => {
   }
 };
 
+// 9. Batch toggle contribution status for multiple contributors
+const batchToggleContributions = async (req, res, next) => {
+  try {
+    const { week_date, status, contributor_ids, notes } = req.body;
+
+    if (!week_date) {
+      return res.status(400).json({ error: 'Week date is required.' });
+    }
+
+    if (!status || !['paid', 'missed'].includes(status)) {
+      return res.status(400).json({ error: 'Status must be paid or missed.' });
+    }
+
+    let targetIds = contributor_ids;
+
+    // If contributor_ids is not passed or empty array, target all contributors
+    if (!targetIds || !Array.isArray(targetIds) || targetIds.length === 0) {
+      const { data: allContributors, error: cErr } = await supabase
+        .from('contributors')
+        .select('id');
+      if (cErr) throw cErr;
+      targetIds = (allContributors || []).map(c => c.id);
+    }
+
+    if (targetIds.length === 0) {
+      return res.json({ success: true, count: 0, message: 'No contributors found to mark.' });
+    }
+
+    const amount = status === 'paid' ? FIXED_WEEKLY_AMOUNT : 0.00;
+    const actualDatePaid = status === 'paid' ? new Date().toISOString().split('T')[0] : null;
+
+    const upsertRows = targetIds.map(cid => ({
+      contributor_id: cid,
+      week_date,
+      status,
+      amount,
+      date_paid: actualDatePaid,
+      notes: notes ? notes.trim() : null
+    }));
+
+    const { data: updated, error: upsertErr } = await supabase
+      .from('contribution_payments')
+      .upsert(upsertRows, {
+        onConflict: 'contributor_id,week_date'
+      })
+      .select();
+
+    if (upsertErr) throw upsertErr;
+
+    res.json({
+      success: true,
+      count: (updated || []).length,
+      status,
+      week_date
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
 module.exports = {
   getContributors,
   createContributor,
@@ -353,5 +413,6 @@ module.exports = {
   getContributorPayments,
   toggleContribution,
   getWeeklyContributions,
-  getContributionStats
+  getContributionStats,
+  batchToggleContributions
 };

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { PiggyBank, Search, CheckCircle2, XCircle, ChevronLeft, ChevronRight, Calendar, Users, Filter, Loader2, Trash2, Eye, RefreshCw } from 'lucide-react';
+import { PiggyBank, Search, CheckCircle2, XCircle, ChevronLeft, ChevronRight, Calendar, Users, Filter, Loader2, Trash2, Eye, RefreshCw, Zap, CheckSquare, Square, AlertCircle, Layers } from 'lucide-react';
 import { formatNaira, formatDate } from '../utils/formatters';
 import { api } from '../services/api';
 
@@ -152,6 +152,97 @@ export default function FoodstuffsPage({
       if (showToast) showToast(err.message || 'Failed to update payment status.', 'error');
     } finally {
       setTogglingId(null);
+    }
+  };
+
+  // Batch / Multi-Select State
+  const [selectedIds, setSelectedIds] = useState([]);
+  const [batchModal, setBatchModal] = useState(null);
+  const [submittingBatch, setSubmittingBatch] = useState(false);
+
+  // Toggle selection for a single contributor row
+  const toggleSelectOne = (id) => {
+    setSelectedIds(prev =>
+      prev.includes(id) ? prev.filter(item => item !== id) : [...prev, id]
+    );
+  };
+
+  // Open batch modal for Global Mark action
+  const openGlobalMarkModal = (type) => {
+    let targetIds = [];
+    let title = '';
+    let status = 'paid';
+    let countDescription = '';
+
+    if (type === 'unmarked_paid') {
+      const unmarkedRecords = weeklyRecords.filter(r => r.status === 'unmarked');
+      targetIds = unmarkedRecords.map(r => r.contributor_id);
+      status = 'paid';
+      title = 'Global Mark All Unmarked as Paid';
+      countDescription = `${targetIds.length} currently unmarked contributors`;
+    } else if (type === 'filtered_paid') {
+      targetIds = filteredWeeklyRecords.map(r => r.contributor_id);
+      status = 'paid';
+      title = 'Global Mark Filtered as Paid';
+      countDescription = `${targetIds.length} contributors matching search/filter`;
+    } else if (type === 'filtered_missed') {
+      targetIds = filteredWeeklyRecords.map(r => r.contributor_id);
+      status = 'missed';
+      title = 'Global Mark Filtered as Missed';
+      countDescription = `${targetIds.length} contributors matching search/filter`;
+    } else if (type === 'selected_paid') {
+      targetIds = selectedIds;
+      status = 'paid';
+      title = 'Mark Selected Contributors as Paid';
+      countDescription = `${targetIds.length} manually selected contributors`;
+    } else if (type === 'selected_missed') {
+      targetIds = selectedIds;
+      status = 'missed';
+      title = 'Mark Selected Contributors as Missed';
+      countDescription = `${targetIds.length} manually selected contributors`;
+    }
+
+    if (targetIds.length === 0) {
+      if (showToast) showToast('No contributors match this batch action.', 'error');
+      return;
+    }
+
+    setBatchModal({
+      title,
+      status,
+      targetIds,
+      countDescription,
+      count: targetIds.length
+    });
+  };
+
+  // Confirm and execute batch update
+  const handleConfirmBatchMark = async () => {
+    if (!batchModal) return;
+    setSubmittingBatch(true);
+    try {
+      const res = await api.batchToggleContributions({
+        week_date: selectedWeekDate,
+        status: batchModal.status,
+        contributor_ids: batchModal.targetIds
+      });
+
+      if (showToast) {
+        showToast(
+          batchModal.status === 'paid'
+            ? `Successfully marked ${res.count} contributors as PAID (₦3,500)!`
+            : `Successfully marked ${res.count} contributors as MISSED.`
+        );
+      }
+
+      setBatchModal(null);
+      setSelectedIds([]);
+      await Promise.all([loadWeeklySheet(), loadStats()]);
+    } catch (err) {
+      console.error('Batch update failed:', err);
+      if (showToast) showToast(err.message || 'Batch update failed.', 'error');
+    } finally {
+      setSubmittingBatch(false);
     }
   };
 
@@ -391,6 +482,56 @@ export default function FoodstuffsPage({
 
           </div>
 
+          {/* Global Batch Action Toolbar */}
+          <div className="institutional-card p-3 sm:p-4 bg-[#fffdfa] border border-[#fde68a] flex flex-col md:flex-row md:items-center justify-between gap-3 shadow-xs">
+            <div className="flex items-center space-x-2.5">
+              <div className="w-8 h-8 rounded bg-[#fffbeb] text-[#d97706] border border-[#fef3c7] flex items-center justify-center shrink-0">
+                <Zap className="w-4 h-4 text-[#d97706]" />
+              </div>
+              <div>
+                <h3 className="text-xs sm:text-sm font-bold text-[#0b1c30] font-sans flex items-center space-x-1.5">
+                  <span>Global Rapid Check-in</span>
+                  <span className="px-2 py-0.5 rounded-xs text-[10px] font-mono bg-[#d97706] text-white">BULK MARK</span>
+                </h3>
+                <p className="text-[11px] text-slate-500 font-mono mt-0.5">
+                  {weeklyRecords.filter(r => r.status === 'unmarked').length} unmarked • {weeklyRecords.filter(r => r.status === 'paid').length} paid • {weeklyRecords.filter(r => r.status === 'missed').length} missed
+                </p>
+              </div>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-2">
+              <button
+                onClick={() => openGlobalMarkModal('unmarked_paid')}
+                disabled={weeklyRecords.filter(r => r.status === 'unmarked').length === 0}
+                className="px-3 py-1.5 text-xs font-bold font-mono bg-[#ecfdf5] hover:bg-[#d1fae5] text-[#059669] border border-[#a7f3d0] rounded-xs transition-colors shadow-xs flex items-center space-x-1.5 disabled:opacity-50 disabled:cursor-not-allowed"
+                title="Mark all currently unmarked contributors in this week as PAID (₦3,500)"
+              >
+                <CheckCircle2 className="w-3.5 h-3.5" />
+                <span>Mark All Unmarked Paid ({weeklyRecords.filter(r => r.status === 'unmarked').length})</span>
+              </button>
+
+              <button
+                onClick={() => openGlobalMarkModal('filtered_paid')}
+                disabled={filteredWeeklyRecords.length === 0}
+                className="px-3 py-1.5 text-xs font-bold font-mono bg-[#fffbeb] hover:bg-[#fef3c7] text-[#b45309] border border-[#fde68a] rounded-xs transition-colors shadow-xs flex items-center space-x-1.5 disabled:opacity-50 disabled:cursor-not-allowed"
+                title="Mark all contributors matching current search/filter as PAID"
+              >
+                <Zap className="w-3.5 h-3.5 text-[#d97706]" />
+                <span>Mark Filtered Paid ({filteredWeeklyRecords.length})</span>
+              </button>
+
+              <button
+                onClick={() => openGlobalMarkModal('filtered_missed')}
+                disabled={filteredWeeklyRecords.length === 0}
+                className="px-3 py-1.5 text-xs font-bold font-mono bg-[#fef2f2] hover:bg-[#ffe4e6] text-[#ba1a1a] border border-[#fecaca] rounded-xs transition-colors shadow-xs flex items-center space-x-1.5 disabled:opacity-50 disabled:cursor-not-allowed"
+                title="Mark all contributors matching current search/filter as MISSED"
+              >
+                <XCircle className="w-3.5 h-3.5" />
+                <span>Mark Filtered Missed</span>
+              </button>
+            </div>
+          </div>
+
           {/* Weekly Search Bar (Sticky) */}
           <div className="sticky top-14 sm:top-[72px] z-30 bg-white/95 backdrop-blur-sm border border-[#cbd5e1] rounded-sm p-3 shadow-md">
             <div className="relative">
@@ -404,6 +545,40 @@ export default function FoodstuffsPage({
               />
             </div>
           </div>
+
+          {/* Multi-Select Selected Action Bar */}
+          {selectedIds.length > 0 && (
+            <div className="sticky top-28 sm:top-[128px] z-30 bg-[#0b1c30] text-white p-3 rounded-sm shadow-xl flex flex-col sm:flex-row items-center justify-between gap-2 border border-[#1c2541]">
+              <div className="flex items-center space-x-2 text-xs font-mono">
+                <CheckSquare className="w-4 h-4 text-[#f59e0b]" />
+                <span>
+                  <strong className="text-[#f59e0b] font-bold">{selectedIds.length}</strong> contributors selected
+                </span>
+              </div>
+              <div className="flex items-center space-x-2 w-full sm:w-auto">
+                <button
+                  onClick={() => openGlobalMarkModal('selected_paid')}
+                  className="flex-1 sm:flex-initial px-3 py-1 text-xs font-bold font-mono bg-[#059669] hover:bg-[#10b981] text-white rounded-xs transition-colors flex items-center justify-center space-x-1 shadow-xs"
+                >
+                  <CheckCircle2 className="w-3.5 h-3.5" />
+                  <span>Mark Selected Paid (₦3,500)</span>
+                </button>
+                <button
+                  onClick={() => openGlobalMarkModal('selected_missed')}
+                  className="flex-1 sm:flex-initial px-3 py-1 text-xs font-bold font-mono bg-[#ba1a1a] hover:bg-[#dc2626] text-white rounded-xs transition-colors flex items-center justify-center space-x-1 shadow-xs"
+                >
+                  <XCircle className="w-3.5 h-3.5" />
+                  <span>Mark Selected Missed</span>
+                </button>
+                <button
+                  onClick={() => setSelectedIds([])}
+                  className="px-2.5 py-1 text-xs font-mono text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-700 rounded-xs transition-colors"
+                >
+                  Clear
+                </button>
+              </div>
+            </div>
+          )}
 
           {/* Weekly Check-in Table */}
           <div className="institutional-panel overflow-hidden">
@@ -421,6 +596,26 @@ export default function FoodstuffsPage({
                 <table className="institutional-table">
                   <thead>
                     <tr>
+                      <th className="w-10 text-center">
+                        <input
+                          type="checkbox"
+                          checked={
+                            displayedWeeklyRecords.length > 0 &&
+                            displayedWeeklyRecords.every(r => selectedIds.includes(r.contributor_id))
+                          }
+                          onChange={() => {
+                            const visibleIds = displayedWeeklyRecords.map(r => r.contributor_id);
+                            const allSelected = visibleIds.length > 0 && visibleIds.every(id => selectedIds.includes(id));
+                            if (allSelected) {
+                              setSelectedIds(prev => prev.filter(id => !visibleIds.includes(id)));
+                            } else {
+                              setSelectedIds(prev => Array.from(new Set([...prev, ...visibleIds])));
+                            }
+                          }}
+                          className="w-4 h-4 rounded-xs border-slate-300 text-[#d97706] focus:ring-[#d97706] cursor-pointer"
+                          title="Select / Deselect all visible rows"
+                        />
+                      </th>
                       <th>Contributor ID</th>
                       <th>Full Name</th>
                       <th>Joining Date</th>
@@ -434,9 +629,18 @@ export default function FoodstuffsPage({
                       const isPaid = r.status === 'paid';
                       const isMissed = r.status === 'missed';
                       const isToggling = togglingId === r.contributor_id;
+                      const isSelected = selectedIds.includes(r.contributor_id);
 
                       return (
-                        <tr key={r.contributor_id} className="group">
+                        <tr key={r.contributor_id} className={`group ${isSelected ? 'bg-[#fffbeb]/80' : ''}`}>
+                          <td className="text-center">
+                            <input
+                              type="checkbox"
+                              checked={isSelected}
+                              onChange={() => toggleSelectOne(r.contributor_id)}
+                              className="w-4 h-4 rounded-xs border-slate-300 text-[#d97706] focus:ring-[#d97706] cursor-pointer"
+                            />
+                          </td>
                           <td className="font-mono">
                             <span className="badge-code">{r.contributor_code}</span>
                           </td>
@@ -706,6 +910,76 @@ export default function FoodstuffsPage({
             )}
           </div>
 
+        </div>
+      )}
+
+      {/* Batch Confirmation Modal */}
+      {batchModal && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-sm border border-[#cbd5e1] max-w-md w-full p-5 space-y-4 shadow-2xl animate-scale-up">
+            <div className="flex items-center space-x-3 text-[#d97706]">
+              <div className="w-10 h-10 rounded-full bg-[#fffbeb] border border-[#fde68a] flex items-center justify-center shrink-0">
+                <Zap className="w-5 h-5 text-[#d97706]" />
+              </div>
+              <div>
+                <h3 className="font-bold text-base text-[#0b1c30]">
+                  {batchModal.title}
+                </h3>
+                <p className="text-xs text-slate-500 font-mono">
+                  Batch operation confirmation
+                </p>
+              </div>
+            </div>
+
+            <div className="p-3 bg-[#f8fafc] border border-[#e2e8f0] rounded-xs text-xs font-mono space-y-2">
+              <div className="flex justify-between">
+                <span className="text-slate-500">Week Date:</span>
+                <span className="font-bold text-[#0b1c30]">{formatDate(selectedWeekDate)}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-slate-500">Target Records:</span>
+                <span className="font-bold text-[#0b1c30]">{batchModal.countDescription}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-slate-500">Action:</span>
+                <span className={`font-bold ${batchModal.status === 'paid' ? 'text-[#059669]' : 'text-[#ba1a1a]'}`}>
+                  Mark as {batchModal.status.toUpperCase()} {batchModal.status === 'paid' ? '(₦3,500.00 each)' : '(₦0.00)'}
+                </span>
+              </div>
+              {batchModal.status === 'paid' && (
+                <div className="flex justify-between pt-2 border-t border-[#cbd5e1] text-sm">
+                  <span className="text-[#0b1c30] font-bold">Total Collection Added:</span>
+                  <span className="font-bold text-[#059669]">{formatNaira(batchModal.count * 3500)}</span>
+                </div>
+              )}
+            </div>
+
+            <div className="flex items-center justify-end space-x-3 pt-2">
+              <button
+                onClick={() => setBatchModal(null)}
+                disabled={submittingBatch}
+                className="px-4 py-2 text-xs font-bold font-mono text-slate-600 hover:text-slate-800 bg-[#f1f5f9] hover:bg-[#e2e8f0] border border-[#cbd5e1] rounded-xs transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleConfirmBatchMark}
+                disabled={submittingBatch}
+                className={`px-4 py-2 text-xs font-bold font-mono text-white rounded-xs transition-colors flex items-center space-x-1.5 shadow-xs ${
+                  batchModal.status === 'paid'
+                    ? 'bg-[#059669] hover:bg-[#047857]'
+                    : 'bg-[#ba1a1a] hover:bg-[#991b1b]'
+                }`}
+              >
+                {submittingBatch ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <CheckCircle2 className="w-4 h-4" />
+                )}
+                <span>{submittingBatch ? 'Processing...' : `Confirm Mark (${batchModal.count} Contributors)`}</span>
+              </button>
+            </div>
+          </div>
         </div>
       )}
 

@@ -8,4 +8,7 @@ router.get('/week', contributorController.getWeeklyContributions);
 // /api/contributions/stats
 router.get('/stats', contributorController.getContributionStats);
 
+// /api/contributions/batch-toggle
+router.post('/batch-toggle', contributorController.batchToggleContributions);
+
 module.exports = router;

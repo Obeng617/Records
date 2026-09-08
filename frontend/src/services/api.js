@@ -92,6 +92,10 @@ export const api = {
     method: 'POST',
     body: JSON.stringify(toggleData)
   }),
+  batchToggleContributions: (batchData) => request('/contributions/batch-toggle', {
+    method: 'POST',
+    body: JSON.stringify(batchData)
+  }),
   getWeeklyContributions: (weekDate) => request(`/contributions/week${weekDate ? `?week_date=${weekDate}` : ''}`),
   getContributionStats: () => request('/contributions/stats')
 };
