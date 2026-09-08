@@ -1,0 +1,20 @@
+# Environment variables
+.env
+.env.*
+*.env
+!.env.example
+
+# SQL Database files
+*.sql
+
+# Dependencies & Build Outputs
+node_modules/
+dist/
+build/
+*.log
+
+# System & Editor files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

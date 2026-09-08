@@ -1,0 +1,13 @@
+# Environment variables
+.env
+.env.*
+*.env
+!.env.example
+
+# SQL Database files
+*.sql
+supabase/*.sql
+
+# Dependencies
+node_modules/
+*.log
