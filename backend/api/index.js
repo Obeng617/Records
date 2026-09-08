@@ -24,6 +24,11 @@ app.use((req, res, next) => {
   next();
 });
 
+// Root route
+app.get('/', (req, res) => {
+  res.json({ status: 'ok', message: 'Records API is running' });
+});
+
 // API Routes
 app.use('/api/clients', clientRoutes);
 app.use('/api/transactions', transactionRoutes);
