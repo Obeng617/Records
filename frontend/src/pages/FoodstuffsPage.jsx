@@ -3,6 +3,8 @@ import { PiggyBank, Search, CheckCircle2, XCircle, ChevronLeft, ChevronRight, Ca
 import { formatNaira, formatDate } from '../utils/formatters';
 import { api } from '../services/api';
 
+const DEFAULT_ROW_LIMIT = 10;
+
 // Helper to get current calendar week Monday date (YYYY-MM-DD)
 function getCurrentMonday() {
   const d = new Date();
@@ -39,6 +41,13 @@ export default function FoodstuffsPage({
   const [contributors, setContributors] = useState([]);
   const [loadingContributors, setLoadingContributors] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const [showAllContributors, setShowAllContributors] = useState(false);
+
+  // Derived: filtered & displayed contributors for directory tab
+  const filteredContributors = contributors;
+  const displayedContributors = showAllContributors
+    ? filteredContributors
+    : filteredContributors.slice(0, DEFAULT_ROW_LIMIT);
 
   // Stats State
   const [stats, setStats] = useState({
