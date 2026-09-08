@@ -90,23 +90,22 @@ export default function ClientDetailModal({
               <div className="text-2xl sm:text-3xl font-bold font-mono tnum text-[#059669] tracking-tight mt-0.5">
                 {formatNaira(currentBalance)}
               </div>
-              <p className="text-[11px] font-mono text-slate-500">Atomic real-time balance calculated from ledger journal</p>
             </div>
 
             <div className="flex items-center space-x-2 w-full sm:w-auto">
               <button
                 onClick={() => onRecordTransaction(client, 'payment')}
-                className="flex-1 sm:flex-initial flex items-center justify-center space-x-1 px-3 py-1.5 text-xs font-semibold font-mono text-white bg-[#059669] hover:bg-[#047857] border border-[#10b981] rounded-sm transition-colors shadow-sm"
+                className="flex-1 sm:flex-initial flex items-center justify-center space-x-1.5 px-3.5 py-2 text-xs font-bold font-sans text-[#059669] bg-[#ecfdf5] hover:bg-[#d1fae5] border border-[#a7f3d0] rounded-sm transition-colors whitespace-nowrap shadow-xs"
               >
-                <ArrowDownRight className="w-3.5 h-3.5" />
+                <ArrowDownRight className="w-4 h-4 shrink-0" />
                 <span>+ Payment</span>
               </button>
 
               <button
                 onClick={() => onRecordTransaction(client, 'withdrawal')}
-                className="flex-1 sm:flex-initial flex items-center justify-center space-x-1 px-3 py-1.5 text-xs font-semibold font-mono text-white bg-[#ba1a1a] hover:bg-[#991b1b] border border-[#ef4444] rounded-sm transition-colors shadow-sm"
+                className="flex-1 sm:flex-initial flex items-center justify-center space-x-1.5 px-3.5 py-2 text-xs font-bold font-sans text-[#ba1a1a] bg-[#fef2f2] hover:bg-[#ffe4e6] border border-[#fecaca] rounded-sm transition-colors whitespace-nowrap shadow-xs"
               >
-                <ArrowUpLeft className="w-3.5 h-3.5" />
+                <ArrowUpLeft className="w-4 h-4 shrink-0" />
                 <span>- Withdrawal</span>
               </button>
 
@@ -116,7 +115,7 @@ export default function ClientDetailModal({
                     onClose();
                     onDeleteClientRequest(client);
                   }}
-                  className="p-1.5 text-slate-400 hover:text-[#ba1a1a] hover:bg-[#fef2f2] border border-[#cbd5e1] hover:border-[#fecaca] rounded-sm transition-colors"
+                  className="p-2 text-slate-400 hover:text-[#ba1a1a] hover:bg-[#fef2f2] border border-[#cbd5e1] hover:border-[#fecaca] rounded-sm transition-colors shrink-0"
                   title="Delete Client Account"
                 >
                   <Trash2 className="w-4 h-4" />
