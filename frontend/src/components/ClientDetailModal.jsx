@@ -8,7 +8,8 @@ export default function ClientDetailModal({
   onClose,
   client,
   onRecordTransaction,
-  onDeleteTransactionRequest
+  onDeleteTransactionRequest,
+  onDeleteClientRequest
 }) {
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -108,8 +109,22 @@ export default function ClientDetailModal({
                 <ArrowUpLeft className="w-3.5 h-3.5" />
                 <span>- Withdrawal</span>
               </button>
+
+              {onDeleteClientRequest && (
+                <button
+                  onClick={() => {
+                    onClose();
+                    onDeleteClientRequest(client);
+                  }}
+                  className="p-1.5 text-slate-400 hover:text-[#ba1a1a] hover:bg-[#fef2f2] border border-[#cbd5e1] hover:border-[#fecaca] rounded-sm transition-colors"
+                  title="Delete Client Account"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              )}
             </div>
           </div>
+
 
           {/* Filter Bar */}
           <div className="institutional-panel p-3 space-y-2">

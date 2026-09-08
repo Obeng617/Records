@@ -104,3 +104,39 @@ exports.getClientById = async (req, res) => {
     return res.status(500).json({ error: 'Internal server error while fetching client details.' });
   }
 };
+
+// DELETE /api/clients/:id - Delete client and cascade all transactions
+exports.deleteClient = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const { data: client, error: clientError } = await supabase
+      .from('clients')
+      .select('id, name, client_code')
+      .eq('id', id)
+      .single();
+
+    if (clientError || !client) {
+      return res.status(404).json({ error: 'Client not found.' });
+    }
+
+    const { error: deleteError } = await supabase
+      .from('clients')
+      .delete()
+      .eq('id', id);
+
+    if (deleteError) {
+      console.error('Supabase deleteClient error:', deleteError);
+      return res.status(500).json({ error: deleteError.message || 'Failed to delete client.' });
+    }
+
+    return res.json({
+      message: `Client ${client.name} (${client.client_code}) deleted successfully.`,
+      id
+    });
+  } catch (err) {
+    console.error('Delete client exception:', err);
+    return res.status(500).json({ error: 'Internal server error while deleting client.' });
+  }
+};
+

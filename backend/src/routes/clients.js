@@ -7,6 +7,7 @@ const transactionController = require('../controllers/transactionController');
 router.post('/', clientController.createClient);
 router.get('/', clientController.getClients);
 router.get('/:id', clientController.getClientById);
+router.delete('/:id', clientController.deleteClient);
 
 // Per-client transaction endpoints
 router.post('/:id/transactions', transactionController.addTransaction);

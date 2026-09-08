@@ -37,6 +37,9 @@ export const api = {
     method: 'POST',
     body: JSON.stringify(clientData)
   }),
+  deleteClient: (id) => request(`/clients/${id}`, {
+    method: 'DELETE'
+  }),
 
   // Transactions
   addTransaction: (clientId, txData) => request(`/clients/${clientId}/transactions`, {

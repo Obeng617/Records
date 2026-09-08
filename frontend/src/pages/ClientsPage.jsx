@@ -1,5 +1,5 @@
 import React from 'react';
-import { Search, UserPlus, ArrowDownRight, ArrowUpLeft, Eye, Phone, ChevronRight } from 'lucide-react';
+import { Search, UserPlus, ArrowDownRight, ArrowUpLeft, Eye, Phone, ChevronRight, Trash2 } from 'lucide-react';
 import { formatNaira, formatDate } from '../utils/formatters';
 
 export default function ClientsPage({
@@ -8,7 +8,8 @@ export default function ClientsPage({
   setSearchTerm,
   onOpenNewClient,
   onSelectClient,
-  onRecordTransaction
+  onRecordTransaction,
+  onDeleteClientRequest
 }) {
   const filteredClients = clients.filter(c => {
     if (!searchTerm) return true;
@@ -135,6 +136,14 @@ export default function ClientsPage({
                             >
                               <Eye className="w-4 h-4" />
                             </button>
+
+                            <button
+                              onClick={() => onDeleteClientRequest(client)}
+                              className="p-1.5 text-slate-400 hover:text-[#ba1a1a] hover:bg-[#fef2f2] rounded-xs transition-colors"
+                              title="Delete Client Account"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
                           </div>
                         </td>
                       </tr>
@@ -194,13 +203,23 @@ export default function ClientsPage({
                         </button>
                       </div>
 
-                      <button
-                        onClick={() => onSelectClient(client)}
-                        className="px-3 py-1.5 text-[#0b1c30] font-semibold hover:text-[#0051d5] bg-[#f1f5f9] border border-[#cbd5e1] rounded-xs flex items-center space-x-1"
-                      >
-                        <span>Ledger</span>
-                        <ChevronRight className="w-4 h-4" />
-                      </button>
+                      <div className="flex items-center space-x-1.5">
+                        <button
+                          onClick={() => onSelectClient(client)}
+                          className="px-3 py-1.5 text-[#0b1c30] font-semibold hover:text-[#0051d5] bg-[#f1f5f9] border border-[#cbd5e1] rounded-xs flex items-center space-x-1"
+                        >
+                          <span>Ledger</span>
+                          <ChevronRight className="w-4 h-4" />
+                        </button>
+
+                        <button
+                          onClick={() => onDeleteClientRequest(client)}
+                          className="p-1.5 text-slate-400 hover:text-[#ba1a1a] hover:bg-[#fef2f2] border border-transparent rounded-xs"
+                          title="Delete Client Account"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
                     </div>
                   </div>
                 );
@@ -213,3 +232,4 @@ export default function ClientsPage({
     </div>
   );
 }
+

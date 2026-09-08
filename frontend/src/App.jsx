@@ -7,6 +7,7 @@ import ClientModal from './components/ClientModal';
 import TransactionModal from './components/TransactionModal';
 import ClientDetailModal from './components/ClientDetailModal';
 import DeleteConfirmModal from './components/DeleteConfirmModal';
+import DeleteClientModal from './components/DeleteClientModal';
 import Toast from './components/Toast';
 import { api } from './services/api';
 
@@ -27,11 +28,13 @@ export default function App() {
   const [presetClientForTx, setPresetClientForTx] = useState(null);
   const [selectedClient, setSelectedClient] = useState(null);
   const [deleteTxTarget, setDeleteTxTarget] = useState(null);
+  const [deleteClientTarget, setDeleteClientTarget] = useState(null);
 
   // Submitting / Error States
   const [submittingClient, setSubmittingClient] = useState(false);
   const [submittingTx, setSubmittingTx] = useState(false);
   const [submittingDelete, setSubmittingDelete] = useState(false);
+  const [submittingDeleteClient, setSubmittingDeleteClient] = useState(false);
   const [txErrorMsg, setTxErrorMsg] = useState('');
 
   // Toast Notification
@@ -161,6 +164,30 @@ export default function App() {
     }
   };
 
+  // Request Client Deletion
+  const handleDeleteClientRequest = (client) => {
+    setDeleteClientTarget(client);
+  };
+
+  // Confirm Client Deletion
+  const handleConfirmDeleteClient = async () => {
+    if (!deleteClientTarget) return;
+    setSubmittingDeleteClient(true);
+    try {
+      await api.deleteClient(deleteClientTarget.id);
+      showToast(`Client ${deleteClientTarget.name} (${deleteClientTarget.client_code}) deleted!`);
+      setDeleteClientTarget(null);
+      if (selectedClient && selectedClient.id === deleteClientTarget.id) {
+        setSelectedClient(null);
+      }
+      triggerRefresh();
+    } catch (err) {
+      showToast(err.message || 'Failed to delete client account.', 'error');
+    } finally {
+      setSubmittingDeleteClient(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#f8f9ff] text-[#0b1c30] flex flex-col font-sans selection:bg-[#0051d5] selection:text-white">
       
@@ -198,6 +225,7 @@ export default function App() {
             onOpenNewClient={() => setIsClientModalOpen(true)}
             onSelectClient={(c) => setSelectedClient(c)}
             onRecordTransaction={(client, type) => handleOpenTransactionModal(client, type)}
+            onDeleteClientRequest={handleDeleteClientRequest}
           />
         )}
 
@@ -234,6 +262,7 @@ export default function App() {
         client={selectedClient}
         onRecordTransaction={(client, type) => handleOpenTransactionModal(client, type)}
         onDeleteTransactionRequest={handleDeleteTransactionRequest}
+        onDeleteClientRequest={handleDeleteClientRequest}
       />
 
       <DeleteConfirmModal
@@ -244,8 +273,17 @@ export default function App() {
         submitting={submittingDelete}
       />
 
+      <DeleteClientModal
+        isOpen={!!deleteClientTarget}
+        onClose={() => setDeleteClientTarget(null)}
+        onConfirm={handleConfirmDeleteClient}
+        client={deleteClientTarget}
+        submitting={submittingDeleteClient}
+      />
+
       {/* Floating Toast Notification */}
       <Toast toast={toast} onClose={() => setToast(null)} />
     </div>
   );
 }
+
