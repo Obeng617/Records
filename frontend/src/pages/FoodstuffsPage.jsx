@@ -498,43 +498,56 @@ export default function FoodstuffsPage({
 
           {/* Multi-Select Floating Executive Action Bar */}
           {selectedIds.length > 0 && (
-            <div className="sticky top-[125px] sm:top-[132px] z-30 bg-[#0b1c30]/95 backdrop-blur-md text-white p-3 sm:px-4 rounded-md shadow-2xl flex flex-col sm:flex-row items-center justify-between gap-3 border border-amber-500/40 animate-fade-in">
-              <div className="flex items-center space-x-2.5 text-xs sm:text-sm font-sans">
-                <CheckSquare className="w-4 h-4 text-amber-400 shrink-0" />
-                <span className="flex items-center space-x-1.5">
+            <div className="sticky top-[125px] sm:top-[132px] z-30 bg-[#0b1c30]/95 backdrop-blur-md text-white p-3 sm:px-4 rounded-md shadow-2xl flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 sm:gap-4 border border-amber-500/40 animate-fade-in max-w-full overflow-hidden">
+              
+              {/* Left Count Indicator & Mobile Clear */}
+              <div className="flex items-center justify-between sm:justify-start space-x-2 text-xs sm:text-sm font-sans">
+                <div className="flex items-center space-x-2">
+                  <CheckSquare className="w-4 h-4 text-amber-400 shrink-0" />
                   <span className="px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40 font-mono font-bold text-xs">
                     {selectedIds.length}
                   </span>
                   <span className="font-semibold text-slate-200">
                     {selectedIds.length === 1 ? 'Contributor Selected' : 'Contributors Selected'}
                   </span>
-                </span>
+                </div>
+
+                {/* Mobile-only Clear button on top-right */}
+                <button
+                  onClick={() => setSelectedIds([])}
+                  className="sm:hidden px-2 py-1 text-[11px] font-mono text-slate-300 hover:text-white bg-slate-800 border border-slate-700 rounded-xs"
+                >
+                  Clear Selection
+                </button>
               </div>
 
-              <div className="flex items-center space-x-2 w-full sm:w-auto shrink-0">
+              {/* Right Action Buttons */}
+              <div className="grid grid-cols-2 sm:flex items-center gap-2 w-full sm:w-auto">
                 <button
                   onClick={() => openGlobalMarkModal('selected_paid')}
-                  className="flex-1 sm:flex-initial px-3.5 py-1.5 text-xs sm:text-sm font-semibold font-sans bg-[#059669] hover:bg-[#10b981] text-white rounded-xs transition-all shadow-sm flex items-center justify-center space-x-1.5 whitespace-nowrap active:scale-95 cursor-pointer"
+                  className="px-2.5 sm:px-3.5 py-2 sm:py-1.5 text-xs sm:text-sm font-semibold font-sans bg-[#059669] hover:bg-[#10b981] text-white rounded-xs transition-all shadow-sm flex items-center justify-center space-x-1 sm:space-x-1.5 whitespace-nowrap active:scale-95 cursor-pointer"
                 >
-                  <CheckCircle2 className="w-4 h-4 text-emerald-200 shrink-0" />
+                  <CheckCircle2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-emerald-200 shrink-0" />
                   <span>Mark Paid (₦3,500)</span>
                 </button>
 
                 <button
                   onClick={() => openGlobalMarkModal('selected_missed')}
-                  className="flex-1 sm:flex-initial px-3.5 py-1.5 text-xs sm:text-sm font-semibold font-sans bg-[#ba1a1a] hover:bg-[#dc2626] text-white rounded-xs transition-all shadow-sm flex items-center justify-center space-x-1.5 whitespace-nowrap active:scale-95 cursor-pointer"
+                  className="px-2.5 sm:px-3.5 py-2 sm:py-1.5 text-xs sm:text-sm font-semibold font-sans bg-[#ba1a1a] hover:bg-[#dc2626] text-white rounded-xs transition-all shadow-sm flex items-center justify-center space-x-1 sm:space-x-1.5 whitespace-nowrap active:scale-95 cursor-pointer"
                 >
-                  <XCircle className="w-4 h-4 text-rose-200 shrink-0" />
+                  <XCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-rose-200 shrink-0" />
                   <span>Mark Missed</span>
                 </button>
 
+                {/* Desktop Clear button */}
                 <button
                   onClick={() => setSelectedIds([])}
-                  className="px-3 py-1.5 text-xs font-mono font-medium text-slate-300 hover:text-white bg-slate-800/80 hover:bg-slate-700 border border-slate-700 rounded-xs transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+                  className="hidden sm:inline-flex px-3 py-1.5 text-xs font-mono font-medium text-slate-300 hover:text-white bg-slate-800/80 hover:bg-slate-700 border border-slate-700 rounded-xs transition-colors whitespace-nowrap shrink-0 cursor-pointer"
                 >
                   Clear
                 </button>
               </div>
+
             </div>
           )}
 
