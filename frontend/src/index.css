@@ -1,6 +1,6 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss/base";
+@import "tailwindcss/components";
+@import "tailwindcss/utilities";
 
 @layer base {
   :root {
@@ -64,6 +64,7 @@
     letter-spacing: 0.04em;
     padding: 10px 14px;
     border-bottom: 1px solid #cbd5e1;
+    white-space: nowrap;
   }
 
   .institutional-table td {
@@ -72,6 +73,7 @@
     font-size: 14px;
     color: #0b1c30;
     background: #ffffff;
+    white-space: nowrap;
   }
 
   .institutional-table tr:hover td {

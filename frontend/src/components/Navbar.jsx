@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ShieldCheck, LayoutDashboard, Users, FileSpreadsheet, PiggyBank, Plus, Menu, X } from 'lucide-react';
+import { ShieldCheck, LayoutDashboard, Users, FileSpreadsheet, PiggyBank, Plus, UserPlus, Menu, X } from 'lucide-react';
 
 export default function Navbar({ activeTab, setActiveTab, onOpenNewClient, onOpenNewTransaction, onOpenNewContributor }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -8,6 +8,8 @@ export default function Navbar({ activeTab, setActiveTab, onOpenNewClient, onOpe
     setActiveTab(tab);
     setMobileMenuOpen(false);
   };
+
+  const isFoodstuffs = activeTab === 'foodstuffs';
 
   return (
     <header className="sticky top-0 z-40 bg-[#0b132b] text-white border-b border-[#1c2541] shadow-md select-none">
@@ -90,15 +92,26 @@ export default function Navbar({ activeTab, setActiveTab, onOpenNewClient, onOpe
 
           {/* Action Buttons & Mobile Toggle */}
           <div className="flex items-center space-x-1.5 sm:space-x-2.5 shrink-0">
-            {/* New Client Button */}
-            <button
-              onClick={onOpenNewClient}
-              className="flex items-center justify-center space-x-1.5 px-3 py-1.5 sm:px-3.5 sm:py-2 text-xs sm:text-sm font-semibold text-slate-100 bg-[#1c2541] hover:bg-[#334155] border border-[#334155] rounded-sm transition-colors shadow-sm whitespace-nowrap"
-              title="Register New Client Account"
-            >
-              <Plus className="w-4 h-4 text-[#60a5fa] shrink-0" />
-              <span>New Client</span>
-            </button>
+            {/* Dynamic New User Button (Switches based on activeTab) */}
+            {isFoodstuffs ? (
+              <button
+                onClick={onOpenNewContributor}
+                className="flex items-center justify-center space-x-1.5 px-3 py-1.5 sm:px-3.5 sm:py-2 text-xs sm:text-sm font-semibold text-amber-200 bg-[#1c2541] hover:bg-[#2d3748] border border-[#f59e0b]/60 rounded-sm transition-colors shadow-sm whitespace-nowrap"
+                title="Register New Foodstuffs Contributor"
+              >
+                <UserPlus className="w-4 h-4 text-[#f59e0b] shrink-0" />
+                <span>New Contributor</span>
+              </button>
+            ) : (
+              <button
+                onClick={onOpenNewClient}
+                className="flex items-center justify-center space-x-1.5 px-3 py-1.5 sm:px-3.5 sm:py-2 text-xs sm:text-sm font-semibold text-slate-100 bg-[#1c2541] hover:bg-[#334155] border border-[#334155] rounded-sm transition-colors shadow-sm whitespace-nowrap"
+                title="Register New Client Account"
+              >
+                <Plus className="w-4 h-4 text-[#60a5fa] shrink-0" />
+                <span>New Client</span>
+              </button>
+            )}
 
             {/* Mobile Menu Hamburger Toggle */}
             <button
@@ -170,10 +183,36 @@ export default function Navbar({ activeTab, setActiveTab, onOpenNewClient, onOpe
               <PiggyBank className="w-4 h-4 text-[#f59e0b]" />
               <span>Foodstuffs Scheme</span>
             </button>
+
+            {/* Dynamic Quick Action inside Hamburger Menu */}
+            <div className="pt-2 border-t border-[#1c2541]">
+              {isFoodstuffs ? (
+                <button
+                  onClick={() => {
+                    onOpenNewContributor();
+                    setMobileMenuOpen(false);
+                  }}
+                  className="w-full flex items-center justify-center space-x-2 px-3.5 py-2.5 rounded-sm text-xs font-bold text-amber-900 bg-[#f59e0b] hover:bg-[#d97706] border border-[#f59e0b] transition-colors shadow-sm"
+                >
+                  <UserPlus className="w-4 h-4" />
+                  <span>Register Foodstuffs Contributor</span>
+                </button>
+              ) : (
+                <button
+                  onClick={() => {
+                    onOpenNewClient();
+                    setMobileMenuOpen(false);
+                  }}
+                  className="w-full flex items-center justify-center space-x-2 px-3.5 py-2.5 rounded-sm text-xs font-bold text-white bg-[#0051d5] hover:bg-[#003ea8] border border-[#3b82f6] transition-colors shadow-sm"
+                >
+                  <Plus className="w-4 h-4" />
+                  <span>Register Daily Client</span>
+                </button>
+              )}
+            </div>
           </div>
         </>
       )}
     </header>
   );
 }
-

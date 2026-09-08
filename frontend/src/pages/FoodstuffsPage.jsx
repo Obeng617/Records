@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { PiggyBank, Search, UserPlus, CheckCircle2, XCircle, ChevronLeft, ChevronRight, Calendar, Users, Filter, Loader2, Trash2, Eye, RefreshCw } from 'lucide-react';
+import { PiggyBank, Search, CheckCircle2, XCircle, ChevronLeft, ChevronRight, Calendar, Users, Filter, Loader2, Trash2, Eye, RefreshCw } from 'lucide-react';
 import { formatNaira, formatDate } from '../utils/formatters';
 import { api } from '../services/api';
 
@@ -86,6 +86,24 @@ export default function FoodstuffsPage({
     }
   }, [searchTerm]);
 
+  const [refreshing, setRefreshing] = useState(false);
+
+  // Manual refresh handler
+  const handleManualRefresh = async () => {
+    setRefreshing(true);
+    try {
+      await Promise.all([
+        loadStats(),
+        activeSubTab === 'weekly' ? loadWeeklySheet() : loadContributors()
+      ]);
+      if (showToast) showToast('Foodstuffs scheme data refreshed!');
+    } catch (err) {
+      console.error('Refresh failed:', err);
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
   useEffect(() => {
     loadStats();
   }, [loadStats]);
@@ -136,16 +154,29 @@ export default function FoodstuffsPage({
     }
   };
 
+  // Display Limit States (Keeps layout compact without overflowing)
+  const [showAllWeekly, setShowAllWeekly] = useState(false);
+  const [showAllContributors, setShowAllContributors] = useState(false);
+  const DEFAULT_ROW_LIMIT = 5;
+
   const filteredWeeklyRecords = weeklyRecords.filter(r => {
     if (weeklyFilter === 'all') return true;
     return r.status === weeklyFilter;
   });
+
+  const displayedWeeklyRecords = showAllWeekly 
+    ? filteredWeeklyRecords 
+    : filteredWeeklyRecords.slice(0, DEFAULT_ROW_LIMIT);
 
   const filteredContributors = contributors.filter(c => {
     if (!searchTerm) return true;
     const term = searchTerm.toLowerCase();
     return c.name.toLowerCase().includes(term) || c.contributor_code.toLowerCase().includes(term);
   });
+
+  const displayedContributors = showAllContributors 
+    ? filteredContributors 
+    : filteredContributors.slice(0, DEFAULT_ROW_LIMIT);
 
   const totalPaidThisWeek = weeklyRecords.filter(r => r.status === 'paid').length;
   const totalMissedThisWeek = weeklyRecords.filter(r => r.status === 'missed').length;
@@ -169,69 +200,106 @@ export default function FoodstuffsPage({
           </p>
         </div>
 
-        <button
-          onClick={onOpenNewContributor}
-          className="flex items-center space-x-2 px-4 py-2 text-xs sm:text-sm font-bold text-white bg-[#d97706] hover:bg-[#b45309] border border-[#f59e0b] rounded-sm transition-colors shadow-sm self-start sm:self-auto"
-        >
-          <UserPlus className="w-4 h-4" />
-          <span>Register Contributor</span>
-        </button>
+        {/* Refresh Data Button with Animated Loader */}
+        <div className="flex items-center space-x-2 self-start sm:self-auto">
+          <button
+            onClick={handleManualRefresh}
+            disabled={refreshing || loadingWeekly || loadingContributors}
+            className="flex items-center space-x-1.5 px-3.5 py-2 text-xs font-mono font-bold text-[#0b1c30] bg-[#ffffff] hover:bg-[#f1f5f9] border border-[#cbd5e1] rounded-sm transition-colors shadow-sm"
+            title="Force refresh foodstuffs database records"
+          >
+            <RefreshCw className={`w-4 h-4 text-[#d97706] ${refreshing || loadingWeekly || loadingContributors ? 'animate-spin' : ''}`} />
+            <span>{refreshing ? 'Refreshing...' : 'Refresh Data'}</span>
+          </button>
+        </div>
       </div>
 
-      {/* Aggregate Stats Bar */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      {/* Aggregate Stats Cards (Matching Dashboard Card Design & Sizing) */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5 mb-6">
         
-        {/* Grand Total */}
-        <div className="institutional-card p-4 bg-[#ffffff] border-l-4 border-l-[#d97706] shadow-xs">
-          <span className="text-[10px] font-mono uppercase text-[#45464d] font-semibold block">Total Scheme Collections</span>
-          <div className="text-2xl font-bold font-mono tnum text-[#b45309] mt-1">
+        {/* Total Scheme Collections */}
+        <div className="institutional-card p-3.5 sm:p-5 relative overflow-hidden group">
+          <div className="flex items-center justify-between mb-1.5">
+            <span className="text-[10px] sm:text-xs font-mono font-bold uppercase tracking-wider text-[#45464d] truncate">
+              Total Collections
+            </span>
+            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded bg-[#fffbeb] text-[#d97706] border border-[#fde68a] flex items-center justify-center shrink-0">
+              <PiggyBank className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+            </div>
+          </div>
+          <div className="text-base xs:text-lg sm:text-3xl font-bold font-mono tnum text-[#b45309] tracking-tight my-0.5 truncate">
             {formatNaira(stats.grand_total || 0)}
           </div>
-          <span className="text-[11px] font-mono text-slate-500 mt-1 block">
-            {stats.total_paid_weeks || 0} total paid weeks
-          </span>
+          <div className="flex items-center justify-between mt-2 pt-2 border-t border-[#e2e8f0] text-[10px] sm:text-xs text-[#45464d]">
+            <span className="truncate">Total scheme funds</span>
+            <span className="font-mono text-[#d97706] font-bold shrink-0">{stats.total_paid_weeks || 0} wks</span>
+          </div>
         </div>
 
-        {/* Total Members */}
-        <div className="institutional-card p-4 bg-[#ffffff] border-l-4 border-l-[#0051d5] shadow-xs">
-          <span className="text-[10px] font-mono uppercase text-[#45464d] font-semibold block">Active Contributors</span>
-          <div className="text-2xl font-bold font-mono tnum text-[#0b1c30] mt-1">
-            {stats.contributors_count || 0} Members
+        {/* Active Contributors */}
+        <div className="institutional-card p-3.5 sm:p-5 relative overflow-hidden group">
+          <div className="flex items-center justify-between mb-1.5">
+            <span className="text-[10px] sm:text-xs font-mono font-bold uppercase tracking-wider text-[#45464d] truncate">
+              Contributors
+            </span>
+            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded bg-[#eff4ff] text-[#0051d5] border border-[#bfdbfe] flex items-center justify-center shrink-0">
+              <Users className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+            </div>
           </div>
-          <span className="text-[11px] font-mono text-slate-500 mt-1 block">
-            Auto-assigned FS-XXXX codes
-          </span>
+          <div className="text-base xs:text-lg sm:text-3xl font-bold font-mono tnum text-[#0b1c30] tracking-tight my-0.5 truncate">
+            {stats.contributors_count || 0}
+          </div>
+          <div className="flex items-center justify-between mt-2 pt-2 border-t border-[#e2e8f0] text-[10px] sm:text-xs text-[#45464d]">
+            <span className="truncate">Active members</span>
+            <span className="font-mono text-[#0051d5] font-bold shrink-0">FS-XXXX</span>
+          </div>
         </div>
 
-        {/* Current Week Status */}
-        <div className="institutional-card p-4 bg-[#ffffff] border-l-4 border-l-[#059669] shadow-xs">
-          <span className="text-[10px] font-mono uppercase text-[#45464d] font-semibold block">This Week's Collections</span>
-          <div className="text-2xl font-bold font-mono tnum text-[#059669] mt-1 flex items-center space-x-2">
-            <span>{totalPaidThisWeek} / {weeklyRecords.length} Paid</span>
+        {/* Current Week Collections */}
+        <div className="institutional-card p-3.5 sm:p-5 relative overflow-hidden group">
+          <div className="flex items-center justify-between mb-1.5">
+            <span className="text-[10px] sm:text-xs font-mono font-bold uppercase tracking-wider text-[#45464d] truncate">
+              This Week
+            </span>
+            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded bg-[#ecfdf5] text-[#059669] border border-[#a7f3d0] flex items-center justify-center shrink-0">
+              <CheckCircle2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+            </div>
           </div>
-          <span className="text-[11px] font-mono text-slate-500 mt-1 block">
-            {totalMissedThisWeek} marked missed
-          </span>
+          <div className="text-base xs:text-lg sm:text-3xl font-bold font-mono tnum text-[#059669] tracking-tight my-0.5 truncate">
+            {totalPaidThisWeek} / {weeklyRecords.length}
+          </div>
+          <div className="flex items-center justify-between mt-2 pt-2 border-t border-[#e2e8f0] text-[10px] sm:text-xs text-[#45464d]">
+            <span className="truncate">Collections paid</span>
+            <span className="font-mono text-[#059669] font-bold shrink-0">{totalMissedThisWeek} missed</span>
+          </div>
         </div>
 
-        {/* Fixed Rate */}
-        <div className="institutional-card p-4 bg-[#ffffff] border-l-4 border-l-slate-400 shadow-xs">
-          <span className="text-[10px] font-mono uppercase text-[#45464d] font-semibold block">Fixed Weekly Amount</span>
-          <div className="text-2xl font-bold font-mono tnum text-[#0b1c30] mt-1">
-            ₦3,500.00
+        {/* Fixed Weekly Rate */}
+        <div className="institutional-card p-3.5 sm:p-5 relative overflow-hidden group">
+          <div className="flex items-center justify-between mb-1.5">
+            <span className="text-[10px] sm:text-xs font-mono font-bold uppercase tracking-wider text-[#45464d] truncate">
+              Weekly Rate
+            </span>
+            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded bg-[#f1f5f9] text-slate-600 border border-[#cbd5e1] flex items-center justify-center shrink-0">
+              <Calendar className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+            </div>
           </div>
-          <span className="text-[11px] font-mono text-slate-500 mt-1 block">
-            Standard rate per member
-          </span>
+          <div className="text-base xs:text-lg sm:text-3xl font-bold font-mono tnum text-[#0b1c30] tracking-tight my-0.5 truncate">
+            ₦3,500
+          </div>
+          <div className="flex items-center justify-between mt-2 pt-2 border-t border-[#e2e8f0] text-[10px] sm:text-xs text-[#45464d]">
+            <span className="truncate">Fixed weekly rate</span>
+            <span className="font-mono text-slate-500 font-bold shrink-0">PER MEMBER</span>
+          </div>
         </div>
 
       </div>
 
       {/* Sub-Navigation Tabs */}
-      <div className="flex items-center space-x-2 border-b border-[#cbd5e1] pb-1 font-sans">
+      <div className="flex items-center space-x-2 border-b border-[#cbd5e1] pb-1 font-sans overflow-x-auto whitespace-nowrap scrollbar-none">
         <button
           onClick={() => setActiveSubTab('weekly')}
-          className={`px-4 py-2 text-xs sm:text-sm font-bold rounded-t-sm transition-colors border-b-2 ${
+          className={`px-4 py-2 text-xs sm:text-sm font-bold rounded-t-sm transition-colors border-b-2 whitespace-nowrap ${
             activeSubTab === 'weekly'
               ? 'border-[#d97706] text-[#d97706] bg-[#fffbeb]'
               : 'border-transparent text-slate-600 hover:text-[#0b1c30]'
@@ -242,7 +310,7 @@ export default function FoodstuffsPage({
 
         <button
           onClick={() => setActiveSubTab('contributors')}
-          className={`px-4 py-2 text-xs sm:text-sm font-bold rounded-t-sm transition-colors border-b-2 ${
+          className={`px-4 py-2 text-xs sm:text-sm font-bold rounded-t-sm transition-colors border-b-2 whitespace-nowrap ${
             activeSubTab === 'contributors'
               ? 'border-[#d97706] text-[#d97706] bg-[#fffbeb]'
               : 'border-transparent text-slate-600 hover:text-[#0b1c30]'
@@ -256,45 +324,55 @@ export default function FoodstuffsPage({
       {activeSubTab === 'weekly' && (
         <div className="space-y-4">
           
-          {/* Week Date Picker Navigation Bar */}
-          <div className="institutional-card p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-[#ffffff]">
+          {/* Week Date Picker & Filter Control Bar (Mobile Optimized) */}
+          <div className="institutional-card p-3 sm:p-4 flex flex-col md:flex-row md:items-center justify-between gap-3 bg-[#ffffff]">
             
-            <div className="flex items-center space-x-2">
+            {/* Week Date Stepper */}
+            <div className="flex items-center justify-between sm:justify-start space-x-1.5 sm:space-x-2 w-full md:w-auto">
               <button
                 onClick={() => setSelectedWeekDate(prev => shiftWeekMonday(prev, -1))}
-                className="px-3 py-1.5 text-xs font-mono font-bold text-[#0b1c30] bg-[#f1f5f9] hover:bg-[#e2e8f0] border border-[#cbd5e1] rounded-sm transition-colors flex items-center space-x-1"
+                className="px-2.5 sm:px-3 py-1.5 text-xs font-mono font-bold text-[#0b1c30] bg-[#f1f5f9] hover:bg-[#e2e8f0] border border-[#cbd5e1] rounded-sm transition-colors flex items-center space-x-1 shrink-0 whitespace-nowrap shadow-xs"
                 title="Previous Calendar Week"
               >
                 <ChevronLeft className="w-4 h-4" />
-                <span>Prev Week</span>
+                <span className="hidden sm:inline">Prev Week</span>
               </button>
 
-              <div className="flex items-center space-x-2 bg-[#fffbeb] border border-[#fef3c7] px-3 py-1.5 rounded-sm">
-                <Calendar className="w-4 h-4 text-[#d97706]" />
-                <span className="text-xs sm:text-sm font-mono font-bold text-[#b45309]">
+              <div className="flex items-center justify-center space-x-1.5 bg-[#fffbeb] border border-[#fef3c7] px-2.5 sm:px-3 py-1.5 rounded-sm shrink-0 whitespace-nowrap flex-1 sm:flex-initial">
+                <Calendar className="w-4 h-4 text-[#d97706] shrink-0" />
+                <span className="text-xs sm:text-sm font-mono font-bold text-[#b45309] whitespace-nowrap">
                   Week of {formatDate(selectedWeekDate)}
                 </span>
               </div>
 
               <button
                 onClick={() => setSelectedWeekDate(prev => shiftWeekMonday(prev, 1))}
-                className="px-3 py-1.5 text-xs font-mono font-bold text-[#0b1c30] bg-[#f1f5f9] hover:bg-[#e2e8f0] border border-[#cbd5e1] rounded-sm transition-colors flex items-center space-x-1"
+                className="px-2.5 sm:px-3 py-1.5 text-xs font-mono font-bold text-[#0b1c30] bg-[#f1f5f9] hover:bg-[#e2e8f0] border border-[#cbd5e1] rounded-sm transition-colors flex items-center space-x-1 shrink-0 whitespace-nowrap shadow-xs"
                 title="Next Calendar Week"
               >
-                <span>Next Week</span>
+                <span className="hidden sm:inline">Next Week</span>
                 <ChevronRight className="w-4 h-4" />
+              </button>
+
+              <button
+                onClick={loadWeeklySheet}
+                disabled={loadingWeekly}
+                className="p-1.5 text-xs text-slate-600 hover:text-[#d97706] bg-[#f1f5f9] hover:bg-[#fffbeb] border border-[#cbd5e1] rounded-sm transition-colors shadow-xs shrink-0"
+                title="Reload Weekly Check-in Sheet"
+              >
+                <RefreshCw className={`w-4 h-4 ${loadingWeekly ? 'animate-spin text-[#d97706]' : ''}`} />
               </button>
             </div>
 
-            {/* Quick Filter by Status */}
-            <div className="flex items-center space-x-2 text-xs font-mono">
-              <span className="text-slate-500 font-semibold hidden sm:inline">Filter Status:</span>
-              <div className="flex items-center space-x-1 bg-[#f1f5f9] p-1 rounded-sm border border-[#cbd5e1]">
+            {/* Quick Filter Status Segmented Control */}
+            <div className="flex items-center space-x-2 text-xs font-mono w-full md:w-auto">
+              <span className="text-slate-500 font-semibold hidden md:inline shrink-0">Filter Status:</span>
+              <div className="grid grid-cols-4 sm:flex items-center gap-1 bg-[#f1f5f9] p-1 rounded-sm border border-[#cbd5e1] w-full md:w-auto">
                 {['all', 'paid', 'missed', 'unmarked'].map((filterOption) => (
                   <button
                     key={filterOption}
                     onClick={() => setWeeklyFilter(filterOption)}
-                    className={`px-2.5 py-1 text-xs font-mono font-bold rounded-xs capitalize transition-all ${
+                    className={`px-2 sm:px-2.5 py-1 text-xs font-mono font-bold rounded-xs capitalize transition-all text-center whitespace-nowrap ${
                       weeklyFilter === filterOption
                         ? 'bg-[#d97706] text-white shadow-xs'
                         : 'text-slate-600 hover:text-[#0b1c30]'
@@ -333,7 +411,7 @@ export default function FoodstuffsPage({
                     </tr>
                   </thead>
                   <tbody>
-                    {filteredWeeklyRecords.map((r) => {
+                    {displayedWeeklyRecords.map((r) => {
                       const isPaid = r.status === 'paid';
                       const isMissed = r.status === 'missed';
                       const isToggling = togglingId === r.contributor_id;
@@ -422,6 +500,22 @@ export default function FoodstuffsPage({
                 </table>
               </div>
             )}
+
+            {/* View All / Show Less Footer Bar */}
+            {filteredWeeklyRecords.length > DEFAULT_ROW_LIMIT && (
+              <div className="px-4 py-3 bg-[#f8fafc] border-t border-[#cbd5e1] flex flex-col sm:flex-row items-center justify-between gap-2 text-xs font-mono">
+                <span className="text-slate-500 font-semibold">
+                  Showing {displayedWeeklyRecords.length} of {filteredWeeklyRecords.length} contributors for week {formatDate(selectedWeekDate)}
+                </span>
+                <button
+                  onClick={() => setShowAllWeekly(!showAllWeekly)}
+                  className="w-full sm:w-auto px-4 py-1.5 text-xs font-bold font-mono text-[#b45309] bg-[#fffbeb] hover:bg-[#fef3c7] border border-[#fde68a] rounded-xs transition-colors flex items-center justify-center space-x-1.5 shadow-xs"
+                >
+                  <span>{showAllWeekly ? 'Show Less' : `View All (${filteredWeeklyRecords.length} Contributors)`}</span>
+                  <ChevronRight className={`w-3.5 h-3.5 transition-transform ${showAllWeekly ? '-rotate-90' : 'rotate-90'}`} />
+                </button>
+              </div>
+            )}
           </div>
 
         </div>
@@ -464,65 +558,131 @@ export default function FoodstuffsPage({
                 No contributors match your search "{searchTerm}".
               </div>
             ) : (
-              <div className="overflow-x-auto">
-                <table className="institutional-table">
-                  <thead>
-                    <tr>
-                      <th>Contributor Code</th>
-                      <th>Account Name</th>
-                      <th>Phone / Contact</th>
-                      <th className="text-right">Total Contributed</th>
-                      <th>Joined Date</th>
-                      <th className="text-center">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filteredContributors.map((c) => (
-                      <tr key={c.id} className="group">
-                        <td className="font-mono">
-                          <span className="badge-code">{c.contributor_code}</span>
-                        </td>
-                        <td className="font-bold text-[#0b1c30] text-sm sm:text-base">
+            <>
+            {/* Desktop Directory Table View (>= 768px) */}
+            <div className="hidden md:block overflow-x-auto">
+              <table className="institutional-table">
+                <thead>
+                  <tr>
+                    <th>Contributor Code</th>
+                    <th>Account Name</th>
+                    <th>Phone / Contact</th>
+                    <th className="text-right">Total Contributed</th>
+                    <th>Joined Date</th>
+                    <th className="text-center">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {displayedContributors.map((c) => (
+                    <tr key={c.id} className="group">
+                      <td className="font-mono whitespace-nowrap">
+                        <span className="badge-code">{c.contributor_code}</span>
+                      </td>
+                      <td className="font-bold text-[#0b1c30] text-sm sm:text-base whitespace-nowrap">
+                        <button
+                          onClick={() => onSelectContributor(c)}
+                          className="hover:text-[#d97706] hover:underline text-left transition-colors"
+                        >
+                          {c.name}
+                        </button>
+                      </td>
+                      <td className="font-mono text-slate-600 text-xs sm:text-sm whitespace-nowrap">
+                        {c.phone || '—'}
+                      </td>
+                      <td className="text-right font-mono tnum font-bold text-[#b45309] text-sm sm:text-base whitespace-nowrap">
+                        {formatNaira(c.total_contributed || 0)}
+                      </td>
+                      <td className="font-mono text-slate-500 text-xs sm:text-sm whitespace-nowrap">
+                        {formatDate(c.start_date)}
+                      </td>
+                      <td className="whitespace-nowrap">
+                        <div className="flex items-center justify-center space-x-2 whitespace-nowrap">
                           <button
                             onClick={() => onSelectContributor(c)}
-                            className="hover:text-[#d97706] hover:underline text-left transition-colors"
+                            className="px-3 py-1.5 text-xs font-bold text-[#b45309] bg-[#fffbeb] hover:bg-[#fef3c7] border border-[#fde68a] rounded-xs flex items-center space-x-1 whitespace-nowrap shrink-0"
+                            title="View Member History & Mark Payments"
                           >
-                            {c.name}
+                            <Eye className="w-3.5 h-3.5 shrink-0" />
+                            <span className="whitespace-nowrap">View & Mark History</span>
                           </button>
-                        </td>
-                        <td className="font-mono text-slate-600 text-xs sm:text-sm">
-                          {c.phone || '—'}
-                        </td>
-                        <td className="text-right font-mono tnum font-bold text-[#b45309] text-sm sm:text-base">
-                          {formatNaira(c.total_contributed || 0)}
-                        </td>
-                        <td className="font-mono text-slate-500 text-xs sm:text-sm">
-                          {formatDate(c.start_date)}
-                        </td>
-                        <td>
-                          <div className="flex items-center justify-center space-x-2">
-                            <button
-                              onClick={() => onSelectContributor(c)}
-                              className="px-3 py-1.5 text-xs font-bold text-[#b45309] bg-[#fffbeb] hover:bg-[#fef3c7] border border-[#fde68a] rounded-xs flex items-center space-x-1"
-                              title="View Member History"
-                            >
-                              <Eye className="w-3.5 h-3.5" />
-                              <span>View History</span>
-                            </button>
 
-                            <button
-                              onClick={() => onDeleteContributorRequest(c)}
-                              className="p-1.5 text-slate-400 hover:text-[#ba1a1a] hover:bg-[#fef2f2] rounded-xs transition-colors"
-                              title="Delete Contributor Account"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+                          <button
+                            onClick={() => onDeleteContributorRequest(c)}
+                            className="p-1.5 text-slate-400 hover:text-[#ba1a1a] hover:bg-[#fef2f2] rounded-xs transition-colors shrink-0"
+                            title="Delete Contributor Account"
+                          >
+                            <Trash2 className="w-4 h-4 shrink-0" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Mobile Stacked Card View (< 768px) */}
+            <div className="md:hidden divide-y divide-[#f1f5f9]">
+              {displayedContributors.map((c) => (
+                <div key={c.id} className="p-4 space-y-3 bg-[#ffffff]">
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <span className="badge-code mb-1 inline-block">{c.contributor_code}</span>
+                      <h3
+                        onClick={() => onSelectContributor(c)}
+                        className="font-bold text-[#0b1c30] text-base hover:text-[#d97706] cursor-pointer"
+                      >
+                        {c.name}
+                      </h3>
+                      <p className="text-xs font-mono text-slate-500 mt-0.5">
+                        Joined: {formatDate(c.start_date)} • {c.phone || 'No phone'}
+                      </p>
+                    </div>
+
+                    <div className="text-right">
+                      <span className="text-[10px] uppercase font-mono text-slate-500 block font-semibold">Total Balance</span>
+                      <span className="font-mono tnum font-bold text-base text-[#b45309]">
+                        {formatNaira(c.total_contributed || 0)}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="pt-3 border-t border-[#f1f5f9] flex items-center space-x-2 text-xs">
+                    <button
+                      onClick={() => onSelectContributor(c)}
+                      className="flex-1 py-2 px-3 text-[#b45309] font-bold bg-[#fffbeb] hover:bg-[#fef3c7] border border-[#fde68a] rounded-sm flex items-center justify-center space-x-1.5 transition-colors whitespace-nowrap shadow-xs"
+                    >
+                      <Eye className="w-4 h-4 shrink-0" />
+                      <span>View & Mark History</span>
+                    </button>
+
+                    <button
+                      onClick={() => onDeleteContributorRequest(c)}
+                      className="p-2 text-slate-400 hover:text-[#ba1a1a] hover:bg-[#fef2f2] border border-[#cbd5e1] rounded-sm transition-colors shrink-0"
+                      title="Delete Contributor Account"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+            </>
+            )}
+
+            {/* View All / Show Less Footer Bar */}
+            {filteredContributors.length > DEFAULT_ROW_LIMIT && (
+              <div className="px-4 py-3 bg-[#f8fafc] border-t border-[#cbd5e1] flex flex-col sm:flex-row items-center justify-between gap-2 text-xs font-mono">
+                <span className="text-slate-500 font-semibold">
+                  Showing {displayedContributors.length} of {filteredContributors.length} directory members
+                </span>
+                <button
+                  onClick={() => setShowAllContributors(!showAllContributors)}
+                  className="w-full sm:w-auto px-4 py-1.5 text-xs font-bold font-mono text-[#b45309] bg-[#fffbeb] hover:bg-[#fef3c7] border border-[#fde68a] rounded-xs transition-colors flex items-center justify-center space-x-1.5 shadow-xs"
+                >
+                  <span>{showAllContributors ? 'Show Less' : `View All (${filteredContributors.length} Members)`}</span>
+                  <ChevronRight className={`w-3.5 h-3.5 transition-transform ${showAllContributors ? '-rotate-90' : 'rotate-90'}`} />
+                </button>
               </div>
             )}
           </div>

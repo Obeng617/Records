@@ -1,5 +1,5 @@
 import React from 'react';
-import { Search, ArrowUpRight, Users, History, ArrowDownRight, ArrowUpLeft, ChevronRight, RefreshCw } from 'lucide-react';
+import { Search, ArrowUpRight, Users, History, ArrowDownRight, ArrowUpLeft, ChevronRight, RefreshCw, PiggyBank } from 'lucide-react';
 import StatsCards from '../components/StatsCards';
 import { formatNaira, formatDate } from '../utils/formatters';
 
@@ -16,7 +16,8 @@ export default function Dashboard({
   onDeleteTransactionRequest,
   onManualRefresh,
   onViewAllClients,
-  onViewAllTransactions
+  onViewAllTransactions,
+  onViewAllFoodstuffs
 }) {
   const filteredClients = clients.filter(c => {
     if (!searchTerm) return true;
@@ -242,6 +243,29 @@ export default function Dashboard({
               </>
             )}
           </div>
+
+          {/* Foodstuffs Scheme Module Quick Link Widget */}
+          {onViewAllFoodstuffs && (
+            <div className="institutional-card p-4 bg-[#fffbeb] border border-[#fef3c7] flex items-center justify-between shadow-xs">
+              <div className="flex items-center space-x-3">
+                <div className="w-8 h-8 rounded bg-[#fef3c7] text-[#d97706] border border-[#fde68a] flex items-center justify-center shrink-0">
+                  <PiggyBank className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="text-xs sm:text-sm font-bold text-[#0b1c30] font-sans">Foodstuffs Scheme Tracker</h3>
+                  <p className="text-[11px] font-mono text-slate-500">Fixed ₦3,500 weekly contribution ledger</p>
+                </div>
+              </div>
+
+              <button
+                onClick={onViewAllFoodstuffs}
+                className="px-3 py-1.5 text-xs font-bold font-mono text-[#b45309] bg-[#ffffff] hover:bg-[#fde68a] border border-[#fde68a] rounded-sm transition-colors flex items-center space-x-1 shrink-0 shadow-xs"
+              >
+                <span>View All Scheme</span>
+                <ChevronRight className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          )}
         </div>
 
       </div>

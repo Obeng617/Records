@@ -269,6 +269,7 @@ export default function App() {
             onManualRefresh={() => loadData(true)}
             onViewAllClients={() => setActiveTab('clients')}
             onViewAllTransactions={() => setActiveTab('transactions')}
+            onViewAllFoodstuffs={() => setActiveTab('foodstuffs')}
           />
         )}
 
