@@ -214,8 +214,11 @@ export default function App() {
             onSelectClient={(c) => setSelectedClient(c)}
             onDeleteTransactionRequest={handleDeleteTransactionRequest}
             onManualRefresh={() => loadData(true)}
+            onViewAllClients={() => setActiveTab('clients')}
+            onViewAllTransactions={() => setActiveTab('transactions')}
           />
         )}
+
 
         {activeTab === 'clients' && (
           <ClientsPage

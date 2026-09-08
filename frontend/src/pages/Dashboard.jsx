@@ -14,13 +14,18 @@ export default function Dashboard({
   onOpenNewTransaction,
   onSelectClient,
   onDeleteTransactionRequest,
-  onManualRefresh
+  onManualRefresh,
+  onViewAllClients,
+  onViewAllTransactions
 }) {
   const filteredClients = clients.filter(c => {
     if (!searchTerm) return true;
     const term = searchTerm.toLowerCase();
     return c.name.toLowerCase().includes(term) || c.client_code.toLowerCase().includes(term);
   });
+
+  const CLIENT_PREVIEW_LIMIT = 5;
+  const TX_PREVIEW_LIMIT = 5;
 
   return (
     <div className="space-y-6 pb-20">
@@ -83,16 +88,27 @@ export default function Dashboard({
               </span>
             </div>
 
-            <button
-              onClick={onOpenNewClient}
-              className="text-xs sm:text-sm font-bold text-[#0051d5] hover:text-[#1d4ed8] flex items-center space-x-1"
-            >
-              <UserPlus className="w-4 h-4" />
-              <span>+ Register Client</span>
-            </button>
+            <div className="flex items-center space-x-3">
+              {onViewAllClients && (
+                <button
+                  onClick={onViewAllClients}
+                  className="text-xs sm:text-sm font-bold text-[#0051d5] hover:underline flex items-center space-x-0.5"
+                >
+                  <span>View All ({filteredClients.length})</span>
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+              )}
+              <button
+                onClick={onOpenNewClient}
+                className="text-xs sm:text-sm font-bold text-[#0051d5] hover:text-[#1d4ed8] flex items-center space-x-1 bg-[#eff4ff] hover:bg-[#dbeafe] px-2.5 py-1 rounded-sm border border-[#bfdbfe]"
+              >
+                <UserPlus className="w-3.5 h-3.5" />
+                <span>+ Register</span>
+              </button>
+            </div>
           </div>
 
-          <div className="institutional-panel overflow-hidden">
+          <div className="institutional-panel overflow-hidden flex flex-col">
             {loading ? (
               <div className="p-10 text-center text-slate-500 text-sm font-mono">
                 Loading client accounts...
@@ -102,47 +118,65 @@ export default function Dashboard({
                 No client records match "{searchTerm}".
               </div>
             ) : (
-              <div className="divide-y divide-[#f1f5f9]">
-                {filteredClients.slice(0, 7).map((client) => {
-                  const bal = parseFloat(client.current_balance) || 0;
-                  return (
-                    <div
-                      key={client.id}
-                      onClick={() => onSelectClient(client)}
-                      className="p-3.5 sm:p-4 hover:bg-[#eff6ff] cursor-pointer flex items-center justify-between transition-all group border-l-2 border-transparent hover:border-[#0051d5]"
-                    >
-                      <div className="flex items-center space-x-3.5">
-                        <div className="w-9 h-9 sm:w-10 sm:h-10 rounded bg-[#f1f5f9] text-[#0051d5] font-mono font-bold text-sm flex items-center justify-center border border-[#cbd5e1] shrink-0">
-                          {client.name.substring(0, 2).toUpperCase()}
+              <>
+                <div className="divide-y divide-[#f1f5f9]">
+                  {filteredClients.slice(0, CLIENT_PREVIEW_LIMIT).map((client) => {
+                    const bal = parseFloat(client.current_balance) || 0;
+                    return (
+                      <div
+                        key={client.id}
+                        onClick={() => onSelectClient(client)}
+                        className="p-3.5 sm:p-4 hover:bg-[#eff6ff] cursor-pointer flex items-center justify-between transition-all group border-l-2 border-transparent hover:border-[#0051d5]"
+                      >
+                        <div className="flex items-center space-x-3.5 min-w-0">
+                          <div className="w-9 h-9 sm:w-10 sm:h-10 rounded bg-[#f1f5f9] text-[#0051d5] font-mono font-bold text-sm flex items-center justify-center border border-[#cbd5e1] shrink-0">
+                            {client.name.substring(0, 2).toUpperCase()}
+                          </div>
+                          <div className="min-w-0">
+                            <div className="flex items-center space-x-2">
+                              <span className="font-bold text-[#0b1c30] text-sm sm:text-base group-hover:text-[#0051d5] transition-colors truncate">
+                                {client.name}
+                              </span>
+                              <span className="badge-code shrink-0">
+                                {client.client_code}
+                              </span>
+                            </div>
+                            {client.phone && (
+                              <p className="text-xs font-mono text-slate-500 mt-0.5 truncate">{client.phone}</p>
+                            )}
+                          </div>
                         </div>
-                        <div>
-                          <div className="flex items-center space-x-2.5">
-                            <span className="font-bold text-[#0b1c30] text-sm sm:text-base group-hover:text-[#0051d5] transition-colors">
-                              {client.name}
-                            </span>
-                            <span className="badge-code">
-                              {client.client_code}
+
+                        <div className="flex items-center space-x-3 sm:space-x-4 shrink-0 ml-2">
+                          <div className="text-right">
+                            <span className="text-[10px] uppercase font-mono text-slate-500 block font-semibold">Ledger Balance</span>
+                            <span className="font-mono tnum font-bold text-sm sm:text-base text-[#059669]">
+                              {formatNaira(bal)}
                             </span>
                           </div>
-                          {client.phone && (
-                            <p className="text-xs font-mono text-slate-500 mt-0.5">{client.phone}</p>
-                          )}
+                          <ChevronRight className="w-5 h-5 text-slate-400 group-hover:text-[#0b1c30] transition-colors" />
                         </div>
                       </div>
+                    );
+                  })}
+                </div>
 
-                      <div className="flex items-center space-x-3 sm:space-x-4">
-                        <div className="text-right">
-                          <span className="text-[10px] uppercase font-mono text-slate-500 block font-semibold">Ledger Balance</span>
-                          <span className="font-mono tnum font-bold text-sm sm:text-base text-[#059669]">
-                            {formatNaira(bal)}
-                          </span>
-                        </div>
-                        <ChevronRight className="w-5 h-5 text-slate-400 group-hover:text-[#0b1c30] transition-colors" />
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
+                {/* View All Clients Footer Control */}
+                <div className="px-4 py-3 bg-[#f8fafc] border-t border-[#e2e8f0] flex items-center justify-between font-mono text-xs text-slate-600 mt-auto">
+                  <span>
+                    Showing {Math.min(filteredClients.length, CLIENT_PREVIEW_LIMIT)} of {filteredClients.length} accounts
+                  </span>
+                  {onViewAllClients && (
+                    <button
+                      onClick={onViewAllClients}
+                      className="px-3.5 py-1.5 font-sans text-xs font-bold text-white bg-[#0051d5] hover:bg-[#1d4ed8] rounded-sm transition-colors flex items-center space-x-1 shadow-sm"
+                    >
+                      <span>View All Clients ({filteredClients.length})</span>
+                      <ChevronRight className="w-4 h-4" />
+                    </button>
+                  )}
+                </div>
+              </>
             )}
           </div>
         </div>
@@ -165,7 +199,7 @@ export default function Dashboard({
             </button>
           </div>
 
-          <div className="institutional-panel p-3.5 space-y-2.5">
+          <div className="institutional-panel p-3.5 space-y-2.5 flex flex-col">
             {loading ? (
               <div className="py-10 text-center text-slate-500 text-sm font-mono">
                 Loading audit trail...
@@ -175,45 +209,63 @@ export default function Dashboard({
                 No recent transaction entries.
               </div>
             ) : (
-              transactions.slice(0, 7).map((tx) => {
-                const isPayment = tx.type === 'payment';
-                const clientName = tx.clients?.name || 'Client Account';
-                const clientCode = tx.clients?.client_code || '';
+              <>
+                <div className="space-y-2.5">
+                  {transactions.slice(0, TX_PREVIEW_LIMIT).map((tx) => {
+                    const isPayment = tx.type === 'payment';
+                    const clientName = tx.clients?.name || 'Client Account';
+                    const clientCode = tx.clients?.client_code || '';
 
-                return (
-                  <div
-                    key={tx.id}
-                    className="p-3 rounded-sm bg-[#ffffff] border border-[#e2e8f0] flex items-center justify-between hover:border-[#cbd5e1] transition-all text-xs sm:text-sm"
-                  >
-                    <div className="flex items-center space-x-3 min-w-0">
-                      <div className={`w-8 h-8 rounded flex items-center justify-center shrink-0 ${
-                        isPayment 
-                          ? 'bg-[#ecfdf5] text-[#059669] border border-[#a7f3d0]' 
-                          : 'bg-[#fef2f2] text-[#ba1a1a] border border-[#fecaca]'
-                      }`}>
-                        {isPayment ? <ArrowDownRight className="w-4 h-4" /> : <ArrowUpLeft className="w-4 h-4" />}
-                      </div>
-                      <div className="min-w-0">
-                        <div className="font-bold text-[#0b1c30] truncate text-xs sm:text-sm">
-                          {clientName}
+                    return (
+                      <div
+                        key={tx.id}
+                        className="p-3 rounded-sm bg-[#ffffff] border border-[#e2e8f0] flex items-center justify-between hover:border-[#cbd5e1] transition-all text-xs sm:text-sm"
+                      >
+                        <div className="flex items-center space-x-3 min-w-0">
+                          <div className={`w-8 h-8 rounded flex items-center justify-center shrink-0 ${
+                            isPayment 
+                              ? 'bg-[#ecfdf5] text-[#059669] border border-[#a7f3d0]' 
+                              : 'bg-[#fef2f2] text-[#ba1a1a] border border-[#fecaca]'
+                          }`}>
+                            {isPayment ? <ArrowDownRight className="w-4 h-4" /> : <ArrowUpLeft className="w-4 h-4" />}
+                          </div>
+                          <div className="min-w-0">
+                            <div className="font-bold text-[#0b1c30] truncate text-xs sm:text-sm">
+                              {clientName}
+                            </div>
+                            <div className="text-xs font-mono text-slate-500 truncate">
+                              {formatDate(tx.transaction_date)} • <span className="text-[#0051d5] font-bold">{clientCode}</span>
+                            </div>
+                          </div>
                         </div>
-                        <div className="text-xs font-mono text-slate-500 truncate">
-                          {formatDate(tx.transaction_date)} • <span className="text-[#0051d5] font-bold">{clientCode}</span>
-                        </div>
-                      </div>
-                    </div>
 
-                    <div className="text-right shrink-0 ml-2">
-                      <span className={`font-mono tnum font-bold text-xs sm:text-sm ${isPayment ? 'text-[#059669]' : 'text-[#ba1a1a]'}`}>
-                        {isPayment ? '+' : '-'}{formatNaira(tx.amount)}
-                      </span>
-                      <span className="text-[10px] text-slate-500 block font-mono">
-                        Bal: {formatNaira(tx.resulting_balance)}
-                      </span>
-                    </div>
+                        <div className="text-right shrink-0 ml-2">
+                          <span className={`font-mono tnum font-bold text-xs sm:text-sm ${isPayment ? 'text-[#059669]' : 'text-[#ba1a1a]'}`}>
+                            {isPayment ? '+' : '-'}{formatNaira(tx.amount)}
+                          </span>
+                          <span className="text-[10px] text-slate-500 block font-mono">
+                            Bal: {formatNaira(tx.resulting_balance)}
+                          </span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {/* View Full Audit Log Footer Control */}
+                {onViewAllTransactions && (
+                  <div className="pt-2 border-t border-[#e2e8f0] flex items-center justify-between text-xs font-mono">
+                    <span className="text-slate-500 text-[11px]">Latest {Math.min(transactions.length, TX_PREVIEW_LIMIT)} entries</span>
+                    <button
+                      onClick={onViewAllTransactions}
+                      className="px-3 py-1.5 font-sans font-bold text-[#059669] hover:text-[#047857] bg-[#ecfdf5] hover:bg-[#d1fae5] border border-[#a7f3d0] rounded-sm transition-colors flex items-center space-x-1 text-xs"
+                    >
+                      <span>Full Audit Log</span>
+                      <ChevronRight className="w-3.5 h-3.5" />
+                    </button>
                   </div>
-                );
-              })
+                )}
+              </>
             )}
           </div>
         </div>
@@ -222,3 +274,4 @@ export default function Dashboard({
     </div>
   );
 }
+
