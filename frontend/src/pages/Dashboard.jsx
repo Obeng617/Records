@@ -88,24 +88,13 @@ export default function Dashboard({
               </span>
             </div>
 
-            <div className="flex items-center space-x-3">
-              {onViewAllClients && (
-                <button
-                  onClick={onViewAllClients}
-                  className="text-xs sm:text-sm font-bold text-[#0051d5] hover:underline flex items-center space-x-0.5"
-                >
-                  <span>View All ({filteredClients.length})</span>
-                  <ChevronRight className="w-4 h-4" />
-                </button>
-              )}
-              <button
-                onClick={onOpenNewClient}
-                className="text-xs sm:text-sm font-bold text-[#0051d5] hover:text-[#1d4ed8] flex items-center space-x-1 bg-[#eff4ff] hover:bg-[#dbeafe] px-2.5 py-1 rounded-sm border border-[#bfdbfe]"
-              >
-                <UserPlus className="w-3.5 h-3.5" />
-                <span>+ Register</span>
-              </button>
-            </div>
+            <button
+              onClick={onOpenNewClient}
+              className="text-xs sm:text-sm font-bold text-[#0051d5] hover:text-[#1d4ed8] flex items-center space-x-1 bg-[#eff4ff] hover:bg-[#dbeafe] px-3 py-1.5 rounded-sm border border-[#bfdbfe] transition-colors"
+            >
+              <UserPlus className="w-3.5 h-3.5" />
+              <span>+ Register Client</span>
+            </button>
           </div>
 
           <div className="institutional-panel overflow-hidden flex flex-col">
@@ -162,20 +151,17 @@ export default function Dashboard({
                 </div>
 
                 {/* View All Clients Footer Control */}
-                <div className="px-4 py-3 bg-[#f8fafc] border-t border-[#e2e8f0] flex items-center justify-between font-mono text-xs text-slate-600 mt-auto">
-                  <span>
-                    Showing {Math.min(filteredClients.length, CLIENT_PREVIEW_LIMIT)} of {filteredClients.length} accounts
-                  </span>
-                  {onViewAllClients && (
+                {onViewAllClients && (
+                  <div className="px-4 py-3 bg-[#f8fafc] border-t border-[#e2e8f0] flex items-center justify-end mt-auto">
                     <button
                       onClick={onViewAllClients}
-                      className="px-3.5 py-1.5 font-sans text-xs font-bold text-white bg-[#0051d5] hover:bg-[#1d4ed8] rounded-sm transition-colors flex items-center space-x-1 shadow-sm"
+                      className="w-full sm:w-auto px-4 py-2 font-sans text-xs font-bold text-white bg-[#0051d5] hover:bg-[#1d4ed8] rounded-sm transition-colors flex items-center justify-center space-x-1.5 shadow-sm"
                     >
-                      <span>View All Clients ({filteredClients.length})</span>
+                      <span>View All Clients</span>
                       <ChevronRight className="w-4 h-4" />
                     </button>
-                  )}
-                </div>
+                  </div>
+                )}
               </>
             )}
           </div>
@@ -254,13 +240,12 @@ export default function Dashboard({
 
                 {/* View Full Audit Log Footer Control */}
                 {onViewAllTransactions && (
-                  <div className="pt-2 border-t border-[#e2e8f0] flex items-center justify-between text-xs font-mono">
-                    <span className="text-slate-500 text-[11px]">Latest {Math.min(transactions.length, TX_PREVIEW_LIMIT)} entries</span>
+                  <div className="pt-2 border-t border-[#e2e8f0] flex items-center justify-end text-xs font-mono">
                     <button
                       onClick={onViewAllTransactions}
-                      className="px-3 py-1.5 font-sans font-bold text-[#059669] hover:text-[#047857] bg-[#ecfdf5] hover:bg-[#d1fae5] border border-[#a7f3d0] rounded-sm transition-colors flex items-center space-x-1 text-xs"
+                      className="w-full sm:w-auto px-3.5 py-1.5 font-sans font-bold text-[#059669] hover:text-[#047857] bg-[#ecfdf5] hover:bg-[#d1fae5] border border-[#a7f3d0] rounded-sm transition-colors flex items-center justify-center space-x-1 text-xs"
                     >
-                      <span>Full Audit Log</span>
+                      <span>View Full Audit Log</span>
                       <ChevronRight className="w-3.5 h-3.5" />
                     </button>
                   </div>
@@ -274,4 +259,5 @@ export default function Dashboard({
     </div>
   );
 }
+
 
