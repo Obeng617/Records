@@ -68,5 +68,30 @@ export const api = {
   },
 
   // Stats
-  getDashboardStats: () => request('/dashboard/stats')
+  getDashboardStats: () => request('/dashboard/stats'),
+
+  // Foodstuffs Scheme Module (Isolated)
+  getContributors: (search = '') => request(`/contributors${search ? `?search=${encodeURIComponent(search)}` : ''}`),
+  getContributorById: (id) => request(`/contributors/${id}`),
+  createContributor: (data) => request('/contributors', {
+    method: 'POST',
+    body: JSON.stringify(data)
+  }),
+  deleteContributor: (id) => request(`/contributors/${id}`, {
+    method: 'DELETE'
+  }),
+  getContributorPayments: (id, filters = {}) => {
+    const params = new URLSearchParams();
+    if (filters.from) params.append('from', filters.from);
+    if (filters.to) params.append('to', filters.to);
+    if (filters.status && filters.status !== 'all') params.append('status', filters.status);
+    const queryString = params.toString();
+    return request(`/contributors/${id}/contributions${queryString ? `?${queryString}` : ''}`);
+  },
+  toggleContribution: (contributorId, toggleData) => request(`/contributors/${contributorId}/contributions/toggle`, {
+    method: 'POST',
+    body: JSON.stringify(toggleData)
+  }),
+  getWeeklyContributions: (weekDate) => request(`/contributions/week${weekDate ? `?week_date=${weekDate}` : ''}`),
+  getContributionStats: () => request('/contributions/stats')
 };

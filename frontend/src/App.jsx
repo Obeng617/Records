@@ -3,18 +3,22 @@ import Navbar from './components/Navbar';
 import Dashboard from './pages/Dashboard';
 import ClientsPage from './pages/ClientsPage';
 import GlobalTransactionsPage from './pages/GlobalTransactionsPage';
+import FoodstuffsPage from './pages/FoodstuffsPage';
 import ClientModal from './components/ClientModal';
 import TransactionModal from './components/TransactionModal';
 import ClientDetailModal from './components/ClientDetailModal';
 import DeleteConfirmModal from './components/DeleteConfirmModal';
 import DeleteClientModal from './components/DeleteClientModal';
+import ContributorModal from './components/ContributorModal';
+import ContributorDetailModal from './components/ContributorDetailModal';
+import DeleteContributorModal from './components/DeleteContributorModal';
 import Toast from './components/Toast';
 import { api } from './services/api';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
 
-  // Core Data State
+  // Core Client Payment Tracker Data State
   const [stats, setStats] = useState({});
   const [clients, setClients] = useState([]);
   const [globalTransactions, setGlobalTransactions] = useState([]);
@@ -22,7 +26,7 @@ export default function App() {
   const [searchTerm, setSearchTerm] = useState('');
   const [refreshTrigger, setRefreshTrigger] = useState(0);
 
-  // Modal States
+  // Client Payment Tracker Modal States
   const [isClientModalOpen, setIsClientModalOpen] = useState(false);
   const [isTxModalOpen, setIsTxModalOpen] = useState(false);
   const [presetClientForTx, setPresetClientForTx] = useState(null);
@@ -36,6 +40,13 @@ export default function App() {
   const [submittingDelete, setSubmittingDelete] = useState(false);
   const [submittingDeleteClient, setSubmittingDeleteClient] = useState(false);
   const [txErrorMsg, setTxErrorMsg] = useState('');
+
+  // Foodstuffs Scheme Modal & Submitting States (Isolated)
+  const [isContributorModalOpen, setIsContributorModalOpen] = useState(false);
+  const [selectedContributor, setSelectedContributor] = useState(null);
+  const [deleteContributorTarget, setDeleteContributorTarget] = useState(null);
+  const [submittingContributor, setSubmittingContributor] = useState(false);
+  const [submittingDeleteContributor, setSubmittingDeleteContributor] = useState(false);
 
   // Toast Notification
   const [toast, setToast] = useState(null);
@@ -188,6 +199,47 @@ export default function App() {
     }
   };
 
+  // -------------------------------------------------------------
+  // FOODSTUFFS SCHEME HANDLERS (ISOLATED MODULE)
+  // -------------------------------------------------------------
+
+  const handleCreateContributor = async (data) => {
+    setSubmittingContributor(true);
+    try {
+      const res = await api.createContributor(data);
+      const c = res.contributor;
+      showToast(`Contributor ${c.name} (${c.contributor_code}) registered successfully!`);
+      setIsContributorModalOpen(false);
+      triggerRefresh();
+    } catch (err) {
+      showToast(err.message || 'Failed to register contributor.', 'error');
+    } finally {
+      setSubmittingContributor(false);
+    }
+  };
+
+  const handleDeleteContributorRequest = (contributor) => {
+    setDeleteContributorTarget(contributor);
+  };
+
+  const handleConfirmDeleteContributor = async () => {
+    if (!deleteContributorTarget) return;
+    setSubmittingDeleteContributor(true);
+    try {
+      await api.deleteContributor(deleteContributorTarget.id);
+      showToast(`Contributor ${deleteContributorTarget.name} (${deleteContributorTarget.contributor_code}) deleted!`);
+      setDeleteContributorTarget(null);
+      if (selectedContributor && selectedContributor.id === deleteContributorTarget.id) {
+        setSelectedContributor(null);
+      }
+      triggerRefresh();
+    } catch (err) {
+      showToast(err.message || 'Failed to delete contributor.', 'error');
+    } finally {
+      setSubmittingDeleteContributor(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#f8f9ff] text-[#0b1c30] flex flex-col font-sans selection:bg-[#0051d5] selection:text-white">
       
@@ -197,6 +249,7 @@ export default function App() {
         setActiveTab={setActiveTab}
         onOpenNewClient={() => setIsClientModalOpen(true)}
         onOpenNewTransaction={(client) => handleOpenTransactionModal(client)}
+        onOpenNewContributor={() => setIsContributorModalOpen(true)}
       />
 
       {/* Main Content Workspace */}
@@ -219,7 +272,6 @@ export default function App() {
           />
         )}
 
-
         {activeTab === 'clients' && (
           <ClientsPage
             clients={clients}
@@ -239,9 +291,18 @@ export default function App() {
             refreshTrigger={refreshTrigger}
           />
         )}
+
+        {activeTab === 'foodstuffs' && (
+          <FoodstuffsPage
+            onOpenNewContributor={() => setIsContributorModalOpen(true)}
+            onSelectContributor={(c) => setSelectedContributor(c)}
+            onDeleteContributorRequest={handleDeleteContributorRequest}
+            showToast={showToast}
+          />
+        )}
       </main>
 
-      {/* Modals */}
+      {/* Client Payment Tracker Modals */}
       <ClientModal
         isOpen={isClientModalOpen}
         onClose={() => setIsClientModalOpen(false)}
@@ -282,6 +343,30 @@ export default function App() {
         onConfirm={handleConfirmDeleteClient}
         client={deleteClientTarget}
         submitting={submittingDeleteClient}
+      />
+
+      {/* Foodstuffs Contribution Tracker Modals (Isolated) */}
+      <ContributorModal
+        isOpen={isContributorModalOpen}
+        onClose={() => setIsContributorModalOpen(false)}
+        onSubmit={handleCreateContributor}
+        submitting={submittingContributor}
+      />
+
+      <ContributorDetailModal
+        isOpen={!!selectedContributor}
+        onClose={() => setSelectedContributor(null)}
+        contributor={selectedContributor}
+        onDeleteContributorRequest={handleDeleteContributorRequest}
+        onRefreshData={triggerRefresh}
+      />
+
+      <DeleteContributorModal
+        isOpen={!!deleteContributorTarget}
+        onClose={() => setDeleteContributorTarget(null)}
+        onConfirm={handleConfirmDeleteContributor}
+        contributor={deleteContributorTarget}
+        submitting={submittingDeleteContributor}
       />
 
       {/* Floating Toast Notification */}

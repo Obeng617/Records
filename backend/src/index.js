@@ -4,6 +4,8 @@ require('dotenv').config();
 
 const clientRoutes = require('./routes/clients');
 const transactionRoutes = require('./routes/transactions');
+const contributorRoutes = require('./routes/contributors');
+const contributionRoutes = require('./routes/contributions');
 const transactionController = require('./controllers/transactionController');
 
 const app = express();
@@ -38,7 +40,7 @@ app.use((req, res, next) => {
   next();
 });
 
-// API Routes
+// API Routes - Client Payment Tracker
 app.use('/api/clients', clientRoutes);
 app.use('/clients', clientRoutes);
 
@@ -47,6 +49,13 @@ app.use('/transactions', transactionRoutes);
 
 app.get('/api/dashboard/stats', transactionController.getDashboardStats);
 app.get('/dashboard/stats', transactionController.getDashboardStats);
+
+// API Routes - Foodstuffs Contribution Tracker (Isolated)
+app.use('/api/contributors', contributorRoutes);
+app.use('/contributors', contributorRoutes);
+
+app.use('/api/contributions', contributionRoutes);
+app.use('/contributions', contributionRoutes);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {

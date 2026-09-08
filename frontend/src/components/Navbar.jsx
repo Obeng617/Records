@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { ShieldCheck, LayoutDashboard, Users, FileSpreadsheet, Plus, Menu, X } from 'lucide-react';
+import { ShieldCheck, LayoutDashboard, Users, FileSpreadsheet, PiggyBank, Plus, Menu, X } from 'lucide-react';
 
-export default function Navbar({ activeTab, setActiveTab, onOpenNewClient, onOpenNewTransaction }) {
+export default function Navbar({ activeTab, setActiveTab, onOpenNewClient, onOpenNewTransaction, onOpenNewContributor }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const handleTabSelect = (tab) => {
@@ -74,6 +74,18 @@ export default function Navbar({ activeTab, setActiveTab, onOpenNewClient, onOpe
               <FileSpreadsheet className="w-4 h-4 text-[#34d399]" />
               <span>Global Audit Log</span>
             </button>
+
+            <button
+              onClick={() => handleTabSelect('foodstuffs')}
+              className={`flex items-center space-x-2 px-3.5 py-2 rounded-sm text-xs sm:text-sm font-semibold transition-colors ${
+                activeTab === 'foodstuffs'
+                  ? 'bg-[#1c2541] text-white border border-[#f59e0b]/50 shadow-inner'
+                  : 'text-slate-300 hover:text-white hover:bg-[#131a33]'
+              }`}
+            >
+              <PiggyBank className="w-4 h-4 text-[#f59e0b]" />
+              <span>Foodstuffs Scheme</span>
+            </button>
           </nav>
 
           {/* Action Buttons & Mobile Toggle */}
@@ -145,6 +157,18 @@ export default function Navbar({ activeTab, setActiveTab, onOpenNewClient, onOpe
             >
               <FileSpreadsheet className="w-4 h-4 text-[#34d399]" />
               <span>Global Audit Log</span>
+            </button>
+
+            <button
+              onClick={() => handleTabSelect('foodstuffs')}
+              className={`w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-sm text-xs font-semibold ${
+                activeTab === 'foodstuffs'
+                  ? 'bg-[#1c2541] text-white border border-[#f59e0b]'
+                  : 'text-slate-300 hover:bg-[#131a33]'
+              }`}
+            >
+              <PiggyBank className="w-4 h-4 text-[#f59e0b]" />
+              <span>Foodstuffs Scheme</span>
             </button>
           </div>
         </>
