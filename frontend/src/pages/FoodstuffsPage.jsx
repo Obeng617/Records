@@ -483,15 +483,17 @@ export default function FoodstuffsPage({
           </div>
 
           {/* Global Batch Action Toolbar */}
-          <div className="institutional-card p-3 sm:p-4 bg-[#fffdfa] border border-[#fde68a] flex flex-col md:flex-row md:items-center justify-between gap-3 shadow-xs">
-            <div className="flex items-center space-x-2.5">
-              <div className="w-8 h-8 rounded bg-[#fffbeb] text-[#d97706] border border-[#fef3c7] flex items-center justify-center shrink-0">
-                <Zap className="w-4 h-4 text-[#d97706]" />
+          <div className="institutional-card p-3.5 sm:p-4 bg-gradient-to-r from-amber-500/5 via-white to-amber-500/5 border border-amber-200/90 rounded-sm flex flex-col lg:flex-row lg:items-center justify-between gap-3 shadow-xs">
+            <div className="flex items-center space-x-3">
+              <div className="w-9 h-9 rounded bg-[#fffbeb] text-[#d97706] border border-[#fef3c7] flex items-center justify-center shrink-0 shadow-xs">
+                <Zap className="w-4.5 h-4.5 text-[#d97706]" />
               </div>
               <div>
-                <h3 className="text-xs sm:text-sm font-bold text-[#0b1c30] font-sans flex items-center space-x-1.5">
+                <h3 className="text-xs sm:text-sm font-bold text-[#0b1c30] font-sans flex items-center space-x-2">
                   <span>Global Rapid Check-in</span>
-                  <span className="px-2 py-0.5 rounded-xs text-[10px] font-mono bg-[#d97706] text-white">BULK MARK</span>
+                  <span className="px-2 py-0.5 rounded-xs text-[10px] font-mono font-bold bg-[#d97706] text-white tracking-wider uppercase">
+                    BULK ACTIONS
+                  </span>
                 </h3>
                 <p className="text-[11px] text-slate-500 font-mono mt-0.5">
                   {weeklyRecords.filter(r => r.status === 'unmarked').length} unmarked • {weeklyRecords.filter(r => r.status === 'paid').length} paid • {weeklyRecords.filter(r => r.status === 'missed').length} missed
@@ -503,17 +505,17 @@ export default function FoodstuffsPage({
               <button
                 onClick={() => openGlobalMarkModal('unmarked_paid')}
                 disabled={weeklyRecords.filter(r => r.status === 'unmarked').length === 0}
-                className="px-3 py-1.5 text-xs font-bold font-mono bg-[#ecfdf5] hover:bg-[#d1fae5] text-[#059669] border border-[#a7f3d0] rounded-xs transition-colors shadow-xs flex items-center space-x-1.5 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-3.5 py-1.5 text-xs font-semibold font-sans bg-[#ecfdf5] hover:bg-[#d1fae5] text-[#059669] border border-[#a7f3d0] rounded-xs transition-all shadow-xs flex items-center space-x-1.5 whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer active:scale-95"
                 title="Mark all currently unmarked contributors in this week as PAID (₦3,500)"
               >
-                <CheckCircle2 className="w-3.5 h-3.5" />
+                <CheckCircle2 className="w-3.5 h-3.5 text-[#059669]" />
                 <span>Mark All Unmarked Paid ({weeklyRecords.filter(r => r.status === 'unmarked').length})</span>
               </button>
 
               <button
                 onClick={() => openGlobalMarkModal('filtered_paid')}
                 disabled={filteredWeeklyRecords.length === 0}
-                className="px-3 py-1.5 text-xs font-bold font-mono bg-[#fffbeb] hover:bg-[#fef3c7] text-[#b45309] border border-[#fde68a] rounded-xs transition-colors shadow-xs flex items-center space-x-1.5 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-3.5 py-1.5 text-xs font-semibold font-sans bg-[#fffbeb] hover:bg-[#fef3c7] text-[#b45309] border border-[#fde68a] rounded-xs transition-all shadow-xs flex items-center space-x-1.5 whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer active:scale-95"
                 title="Mark all contributors matching current search/filter as PAID"
               >
                 <Zap className="w-3.5 h-3.5 text-[#d97706]" />
@@ -523,10 +525,10 @@ export default function FoodstuffsPage({
               <button
                 onClick={() => openGlobalMarkModal('filtered_missed')}
                 disabled={filteredWeeklyRecords.length === 0}
-                className="px-3 py-1.5 text-xs font-bold font-mono bg-[#fef2f2] hover:bg-[#ffe4e6] text-[#ba1a1a] border border-[#fecaca] rounded-xs transition-colors shadow-xs flex items-center space-x-1.5 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-3.5 py-1.5 text-xs font-semibold font-sans bg-[#fef2f2] hover:bg-[#ffe4e6] text-[#ba1a1a] border border-[#fecaca] rounded-xs transition-all shadow-xs flex items-center space-x-1.5 whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer active:scale-95"
                 title="Mark all contributors matching current search/filter as MISSED"
               >
-                <XCircle className="w-3.5 h-3.5" />
+                <XCircle className="w-3.5 h-3.5 text-[#ba1a1a]" />
                 <span>Mark Filtered Missed</span>
               </button>
             </div>
@@ -546,33 +548,41 @@ export default function FoodstuffsPage({
             </div>
           </div>
 
-          {/* Multi-Select Selected Action Bar */}
+          {/* Multi-Select Floating Executive Action Bar */}
           {selectedIds.length > 0 && (
-            <div className="sticky top-28 sm:top-[128px] z-30 bg-[#0b1c30] text-white p-3 rounded-sm shadow-xl flex flex-col sm:flex-row items-center justify-between gap-2 border border-[#1c2541]">
-              <div className="flex items-center space-x-2 text-xs font-mono">
-                <CheckSquare className="w-4 h-4 text-[#f59e0b]" />
-                <span>
-                  <strong className="text-[#f59e0b] font-bold">{selectedIds.length}</strong> contributors selected
+            <div className="sticky top-[125px] sm:top-[132px] z-30 bg-[#0b1c30]/95 backdrop-blur-md text-white p-3 sm:px-4 rounded-md shadow-2xl flex flex-col sm:flex-row items-center justify-between gap-3 border border-amber-500/40 animate-fade-in">
+              <div className="flex items-center space-x-2.5 text-xs sm:text-sm font-sans">
+                <CheckSquare className="w-4 h-4 text-amber-400 shrink-0" />
+                <span className="flex items-center space-x-1.5">
+                  <span className="px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40 font-mono font-bold text-xs">
+                    {selectedIds.length}
+                  </span>
+                  <span className="font-semibold text-slate-200">
+                    {selectedIds.length === 1 ? 'Contributor Selected' : 'Contributors Selected'}
+                  </span>
                 </span>
               </div>
-              <div className="flex items-center space-x-2 w-full sm:w-auto">
+
+              <div className="flex items-center space-x-2 w-full sm:w-auto shrink-0">
                 <button
                   onClick={() => openGlobalMarkModal('selected_paid')}
-                  className="flex-1 sm:flex-initial px-3 py-1 text-xs font-bold font-mono bg-[#059669] hover:bg-[#10b981] text-white rounded-xs transition-colors flex items-center justify-center space-x-1 shadow-xs"
+                  className="flex-1 sm:flex-initial px-3.5 py-1.5 text-xs sm:text-sm font-semibold font-sans bg-[#059669] hover:bg-[#10b981] text-white rounded-xs transition-all shadow-sm flex items-center justify-center space-x-1.5 whitespace-nowrap active:scale-95 cursor-pointer"
                 >
-                  <CheckCircle2 className="w-3.5 h-3.5" />
-                  <span>Mark Selected Paid (₦3,500)</span>
+                  <CheckCircle2 className="w-4 h-4 text-emerald-200 shrink-0" />
+                  <span>Mark Paid (₦3,500)</span>
                 </button>
+
                 <button
                   onClick={() => openGlobalMarkModal('selected_missed')}
-                  className="flex-1 sm:flex-initial px-3 py-1 text-xs font-bold font-mono bg-[#ba1a1a] hover:bg-[#dc2626] text-white rounded-xs transition-colors flex items-center justify-center space-x-1 shadow-xs"
+                  className="flex-1 sm:flex-initial px-3.5 py-1.5 text-xs sm:text-sm font-semibold font-sans bg-[#ba1a1a] hover:bg-[#dc2626] text-white rounded-xs transition-all shadow-sm flex items-center justify-center space-x-1.5 whitespace-nowrap active:scale-95 cursor-pointer"
                 >
-                  <XCircle className="w-3.5 h-3.5" />
-                  <span>Mark Selected Missed</span>
+                  <XCircle className="w-4 h-4 text-rose-200 shrink-0" />
+                  <span>Mark Missed</span>
                 </button>
+
                 <button
                   onClick={() => setSelectedIds([])}
-                  className="px-2.5 py-1 text-xs font-mono text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-700 rounded-xs transition-colors"
+                  className="px-3 py-1.5 text-xs font-mono font-medium text-slate-300 hover:text-white bg-slate-800/80 hover:bg-slate-700 border border-slate-700 rounded-xs transition-colors whitespace-nowrap shrink-0 cursor-pointer"
                 >
                   Clear
                 </button>
@@ -958,14 +968,14 @@ export default function FoodstuffsPage({
               <button
                 onClick={() => setBatchModal(null)}
                 disabled={submittingBatch}
-                className="px-4 py-2 text-xs font-bold font-mono text-slate-600 hover:text-slate-800 bg-[#f1f5f9] hover:bg-[#e2e8f0] border border-[#cbd5e1] rounded-xs transition-colors"
+                className="px-4 py-2 text-xs font-semibold font-sans text-slate-700 hover:text-slate-900 bg-[#f1f5f9] hover:bg-[#e2e8f0] border border-[#cbd5e1] rounded-xs transition-colors cursor-pointer"
               >
                 Cancel
               </button>
               <button
                 onClick={handleConfirmBatchMark}
                 disabled={submittingBatch}
-                className={`px-4 py-2 text-xs font-bold font-mono text-white rounded-xs transition-colors flex items-center space-x-1.5 shadow-xs ${
+                className={`px-4 py-2 text-xs font-semibold font-sans text-white rounded-xs transition-all shadow-xs flex items-center space-x-1.5 whitespace-nowrap cursor-pointer ${
                   batchModal.status === 'paid'
                     ? 'bg-[#059669] hover:bg-[#047857]'
                     : 'bg-[#ba1a1a] hover:bg-[#991b1b]'
