@@ -187,21 +187,15 @@ export default function TransactionModal({
 
           {/* Transaction Date */}
           <div>
-            <div className="flex items-center justify-between mb-1.5">
-              <label className="block text-xs font-mono font-bold uppercase text-[#45464d]">
-                Effective Date of Entry <span className="text-[#ba1a1a]">*</span>
-              </label>
-              <span className="text-[10px] font-mono text-slate-500 font-semibold bg-[#f1f5f9] px-2 py-0.5 rounded border border-[#cbd5e1]">
-                🔒 Locked to Today (Non-editable)
-              </span>
-            </div>
+            <label className="block text-xs font-mono font-bold uppercase text-[#45464d] mb-1.5">
+              Effective Date of Entry <span className="text-[#ba1a1a]">*</span>
+            </label>
             <input
               type="date"
               required
-              readOnly
-              disabled
               value={transactionDate}
-              className="w-full px-3.5 py-2 bg-[#f1f5f9] border border-[#cbd5e1] rounded-sm text-sm text-[#475569] font-mono font-bold cursor-not-allowed select-none shadow-inner"
+              onChange={(e) => setTransactionDate(e.target.value)}
+              className="w-full px-3.5 py-2 bg-[#ffffff] border border-[#cbd5e1] rounded-sm text-sm text-[#0b1c30] font-mono font-bold focus:outline-none focus:border-[#0051d5] shadow-sm"
             />
           </div>
 

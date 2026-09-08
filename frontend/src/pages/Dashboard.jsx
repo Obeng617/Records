@@ -1,5 +1,5 @@
 import React from 'react';
-import { Search, UserPlus, ArrowUpRight, Users, History, ArrowDownRight, ArrowUpLeft, ChevronRight, RefreshCw } from 'lucide-react';
+import { Search, ArrowUpRight, Users, History, ArrowDownRight, ArrowUpLeft, ChevronRight, RefreshCw } from 'lucide-react';
 import StatsCards from '../components/StatsCards';
 import { formatNaira, formatDate } from '../utils/formatters';
 
@@ -83,18 +83,7 @@ export default function Dashboard({
               <h2 className="text-base font-bold text-[#0b1c30] font-sans uppercase tracking-wider">
                 Client Balances Directory
               </h2>
-              <span className="text-xs font-mono font-bold px-2 py-0.5 rounded-xs bg-[#eff4ff] text-[#0051d5] border border-[#bfdbfe]">
-                {filteredClients.length}
-              </span>
             </div>
-
-            <button
-              onClick={onOpenNewClient}
-              className="text-xs sm:text-sm font-bold text-[#0051d5] hover:text-[#1d4ed8] flex items-center space-x-1 bg-[#eff4ff] hover:bg-[#dbeafe] px-3 py-1.5 rounded-sm border border-[#bfdbfe] transition-colors"
-            >
-              <UserPlus className="w-3.5 h-3.5" />
-              <span>+ Register Client</span>
-            </button>
           </div>
 
           <div className="institutional-panel overflow-hidden flex flex-col">

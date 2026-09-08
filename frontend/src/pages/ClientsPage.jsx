@@ -1,5 +1,5 @@
 import React from 'react';
-import { Search, UserPlus, ArrowDownRight, ArrowUpLeft, Eye, Phone, ChevronRight, Trash2 } from 'lucide-react';
+import { Search, ArrowDownRight, ArrowUpLeft, Eye, Phone, ChevronRight, Trash2 } from 'lucide-react';
 import { formatNaira, formatDate } from '../utils/formatters';
 
 export default function ClientsPage({
@@ -30,14 +30,6 @@ export default function ClientsPage({
             Centralized index of registered client ledgers and current standing balances
           </p>
         </div>
-
-        <button
-          onClick={onOpenNewClient}
-          className="flex items-center space-x-2 px-4 py-2 text-xs sm:text-sm font-bold text-white bg-[#0051d5] hover:bg-[#1d4ed8] border border-[#3b82f6] rounded-sm transition-colors shadow-sm self-start sm:self-auto"
-        >
-          <UserPlus className="w-4 h-4" />
-          <span>Register New Client</span>
-        </button>
       </div>
 
       {/* Toolbar & Search */}
@@ -184,37 +176,39 @@ export default function ClientsPage({
                       </div>
                     </div>
 
-                    <div className="pt-2.5 border-t border-[#f1f5f9] flex items-center justify-between space-x-2 text-xs">
-                      <div className="flex items-center space-x-2">
+                    <div className="pt-3 border-t border-[#f1f5f9] space-y-2 text-xs">
+                      {/* Row 1: Primary Action Buttons (Payment & Withdrawal) */}
+                      <div className="grid grid-cols-2 gap-2">
                         <button
                           onClick={() => onRecordTransaction(client, 'payment')}
-                          className="px-3 py-1.5 text-xs font-bold text-[#059669] bg-[#ecfdf5] border border-[#a7f3d0] rounded-xs flex items-center space-x-1"
+                          className="w-full py-2 px-2.5 font-sans font-bold text-[#059669] bg-[#ecfdf5] hover:bg-[#d1fae5] border border-[#a7f3d0] rounded-sm flex items-center justify-center space-x-1.5 transition-colors whitespace-nowrap shadow-xs"
                         >
-                          <ArrowDownRight className="w-3.5 h-3.5" />
-                          <span>+ Pay</span>
+                          <ArrowDownRight className="w-4 h-4 shrink-0" />
+                          <span>Pay</span>
                         </button>
 
                         <button
                           onClick={() => onRecordTransaction(client, 'withdrawal')}
-                          className="px-3 py-1.5 text-xs font-bold text-[#ba1a1a] bg-[#fef2f2] border border-[#fecaca] rounded-xs flex items-center space-x-1"
+                          className="w-full py-2 px-2.5 font-sans font-bold text-[#ba1a1a] bg-[#fef2f2] hover:bg-[#ffe4e6] border border-[#fecaca] rounded-sm flex items-center justify-center space-x-1.5 transition-colors whitespace-nowrap shadow-xs"
                         >
-                          <ArrowUpLeft className="w-3.5 h-3.5" />
-                          <span>- Withdraw</span>
+                          <ArrowUpLeft className="w-4 h-4 shrink-0" />
+                          <span>Withdraw</span>
                         </button>
                       </div>
 
-                      <div className="flex items-center space-x-1.5">
+                      {/* Row 2: Secondary Controls (Ledger & Delete) */}
+                      <div className="flex items-center space-x-2">
                         <button
                           onClick={() => onSelectClient(client)}
-                          className="px-3 py-1.5 text-[#0b1c30] font-semibold hover:text-[#0051d5] bg-[#f1f5f9] border border-[#cbd5e1] rounded-xs flex items-center space-x-1"
+                          className="flex-1 py-1.5 px-3 text-[#0b1c30] font-semibold hover:text-[#0051d5] bg-[#f8fafc] hover:bg-[#f1f5f9] border border-[#cbd5e1] rounded-sm flex items-center justify-center space-x-1 transition-colors whitespace-nowrap"
                         >
-                          <span>Ledger</span>
-                          <ChevronRight className="w-4 h-4" />
+                          <span>View Full Ledger</span>
+                          <ChevronRight className="w-4 h-4 text-slate-400" />
                         </button>
 
                         <button
                           onClick={() => onDeleteClientRequest(client)}
-                          className="p-1.5 text-slate-400 hover:text-[#ba1a1a] hover:bg-[#fef2f2] border border-transparent rounded-xs"
+                          className="p-1.5 text-slate-400 hover:text-[#ba1a1a] hover:bg-[#fef2f2] border border-[#e2e8f0] rounded-sm transition-colors shrink-0"
                           title="Delete Client Account"
                         >
                           <Trash2 className="w-4 h-4" />
